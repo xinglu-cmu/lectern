@@ -1,6 +1,6 @@
 # ADR-006: Recommendation module is phased behind v1, with a digest-first product surface
 
-**Status:** accepted · 2026-09-22
+**Status:** parked indefinitely by [ADR-007](ADR-007-pivot-to-screening-tool.md) (2026-09-23) — the pivoted product has no recommendation surface; the event log survives, and the MLE phase-2 slot moved to distilling the zoning classifier into a local model · originally accepted 2026-09-22
 
 ## Context
 

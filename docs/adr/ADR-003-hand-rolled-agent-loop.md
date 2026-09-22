@@ -1,6 +1,6 @@
 # ADR-003: Hand-rolled agent loop, no orchestration framework
 
-**Status:** accepted · 2026-09-22
+**Status:** dormant — the agent loop was cut from v1 by [ADR-007](ADR-007-pivot-to-screening-tool.md) (2026-09-23); if a "work with the cleaned doc" mode ships in phase 2, this decision reactivates as written · originally accepted 2026-09-22
 
 ## Context
 

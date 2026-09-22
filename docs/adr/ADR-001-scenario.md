@@ -1,6 +1,6 @@
 # ADR-001: Build a paper-reading workspace (not a course copilot or job-search copilot)
 
-**Status:** accepted · 2026-09-22
+**Status:** superseded in part by [ADR-007](ADR-007-pivot-to-screening-tool.md) (2026-09-23) — the scenario analysis stands as history; the product focus moved to document screening · originally accepted 2026-09-22
 
 ## Context
 

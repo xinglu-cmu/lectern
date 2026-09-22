@@ -1,6 +1,6 @@
 # ADR-005: arXiv-only corpus, HTML-first parsing, GROBID as fallback
 
-**Status:** accepted · 2026-09-22
+**Status:** superseded by [ADR-007](ADR-007-pivot-to-screening-tool.md) (2026-09-23) — arbitrary uploads are now core; conversion rides on MarkItDown/Docling behind a Converter interface, GROBID dropped. The buy-the-boring-part instinct carries over · originally accepted 2026-09-22
 
 ## Context
 
