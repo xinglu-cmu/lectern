@@ -2,6 +2,8 @@
 
 > **Read with receipts.** A provenance-first reading workspace: every claim shows its source, and every document is treated as untrusted input.
 
+[![ci](https://github.com/xinglu-cmu/lectern/actions/workflows/ci.yml/badge.svg)](https://github.com/xinglu-cmu/lectern/actions/workflows/ci.yml) · [project board](https://github.com/users/xinglu-cmu/projects/1) · [milestones](https://github.com/xinglu-cmu/lectern/milestones)
+
 Lectern lets you build a corpus of arXiv papers and ask questions against it. Three things make it different from "chat with your PDF":
 
 - **Verifiable citations** — every generated claim links to an exact quoted span in the source, machine-verified verbatim; unverifiable citations are visibly badged.
