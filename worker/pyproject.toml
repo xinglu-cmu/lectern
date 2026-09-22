@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lectern-worker"
+version = "0.1.0"
+description = "Lectern ingestion worker — fetch, parse, zone, screen, chunk, embed"
+requires-python = ">=3.12"
+dependencies = [
+    "psycopg[binary]>=3.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+lectern-worker = "lectern_worker.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["lectern_worker"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
