@@ -4,7 +4,7 @@
 
 ## Context
 
-Three candidate scenarios were on the table (see the project context brief): A — course-study copilot, B — paper-reading agent, C — job-search copilot. The project must serve two goals at once: a public, deployed, non-toy system for SDE internship applications, and a testbed for a human–AI interaction study (editable plan checkpoint, WInE-lab research plan) in Spring 2027.
+Three candidate scenarios were on the table (see the project context brief): A — course-study copilot, B — paper-reading agent, C — job-search copilot. The project must serve two goals at once: a public, deployed, non-toy system for SDE internship applications, and a testbed for a human–AI interaction study (editable plan checkpoint, per a private research plan) in Spring 2027.
 
 ## Decision
 

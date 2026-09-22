@@ -8,7 +8,7 @@
 | Status | v1.0 — approved baseline for the 8-week build |
 | Date | 2026-09-22 |
 | Reviewers | (self; future: research mentor) |
-| Related | [ADR-001…005](adr/), research plan (private, `Research Plan/Sherry-Wu-HCI-Exploration-Plan.md`) |
+| Related | [ADR-001…005](adr/), research plan (private, kept outside this repo) |
 
 ---
 
@@ -23,7 +23,7 @@ Lectern is a web workspace where a user (a grad student or a paper-heavy course'
 Two goals, one codebase:
 
 - **Résumé (primary):** a public, deployed, non-toy system — owned retrieval infra (Postgres + pgvector), an async ingestion pipeline, an eval harness gating CI, tracing, cost accounting, real users (target ≥ 20 CMU users by week 8).
-- **Research (secondary):** the deployed platform doubles as the instrumented testbed for the editable-plan-checkpoint study (WInE-lab application portfolio); interaction telemetry is designed in from day one, with the formal study gated on a faculty mentor + IRB.
+- **Research (secondary):** the deployed platform doubles as the instrumented testbed for the editable-plan-checkpoint study (HCI research portfolio); interaction telemetry is designed in from day one, with the formal study gated on a faculty mentor + IRB.
 - **ML-system breadth (tertiary):** a phased recommendation module (§16) turns the app's own event log and embeddings into an end-to-end ML pipeline for MLE-track interviews — phase 0 (logging) ships inside v1; model training deliberately does not.
 
 **v1 scope fence:** arXiv papers only; single-user projects; Q&A with span-level citations; one plan checkpoint; screening via static heuristics + classifiers. See Non-goals (§2).
@@ -59,7 +59,7 @@ Primary personas:
 
 - **P1 — grad student / RA** with a folder of 10–50 papers for a project or qualifier. Wants trustworthy answers ("what does X claim about Y, and show me where").
 - **P2 — student in a paper-driven course** (e.g., 18-749-style reading lists). Wants weekly-readings Q&A that they can verify before repeating in class.
-- **P3 — the author (dogfooding)** — reading for the WInE application and coursework.
+- **P3 — the author (dogfooding)** — reading for research applications and coursework.
 
 Stories (acceptance-test level):
 
@@ -313,7 +313,7 @@ Two suites, both versioned in-repo under `eval/`.
 ## 13. Security and privacy
 
 - Auth: bcrypt(12); JWT access 15 min + rotating refresh (httpOnly, SameSite=Lax); logout revokes refresh family. CORS allowlist. HTTPS everywhere (Caddy).
-- Secrets: environment/platform secrets only — never in git (lesson institutionalized from the YACA repo). Dependabot + `npm audit`/`pip-audit`/OWASP dependency-check in CI.
+- Secrets: environment/platform secrets only — never in git. Dependabot + `npm audit`/`pip-audit`/OWASP dependency-check in CI.
 - Injection trust boundary per §5.1; screening per §6. No agent tool can mutate state in v1.
 - Privacy: consent checkbox at signup covering telemetry (§15) with a plain-language privacy page; per-user data export and deletion endpoint; telemetry is pseudonymous (user-id keyed, no content of third parties); private R2 bucket for exports.
 - **IRB boundary:** product telemetry ≠ human-subjects research. No study analyses on other users' data until a faculty mentor is on board and CMU IRB guidance is cleared; until then analyses cover the author's own usage only. The mode-A/B flag ships dormant-by-default for other users (everyone gets B, the better product) and is only randomized under the study protocol.
@@ -358,7 +358,7 @@ MLE-track interviews walk a candidate through an end-to-end ML pipeline on data 
 | 5 | Oct 19–25 | Mode B checkpoint (pause/resume, plan editor, edit diffs); corrections; verification view; D1+P1 detectors; quarantine review flow | Flagship demo: edit plan → verified answer → catch an attacked PDF |
 | 6 | Oct 26–Nov 1 | Eval harness in CI (both suites); OTel + logs + dashboards; budgets + rate limits + cost accounting | CI runs evals with thresholds; traces + budget block visible |
 | 7 | Nov 2–8 | Polish + onboarding + privacy/consent; load test + tuning; README w/ architecture + numbers; seed reading-list packs; onboard first users | ≥ 10 real users; k6 numbers in README |
-| 8 | Nov 9–15 | Feedback iteration; telemetry export pipeline; résumé bullets; 2-page research note; frozen A/B protocol doc | Deliverables checklist done; WInE application package ready |
+| 8 | Nov 9–15 | Feedback iteration; telemetry export pipeline; résumé bullets; 2-page research note; frozen A/B protocol doc | Deliverables checklist done; research application package ready |
 
 Buffer: Nov 16–Dec — user growth to ≥ 20; **digest v0 (rec phase 1 — ship before winter break, §16)**; v1.1 picks (upload, comparison tables); interview prep against the codebase.
 
