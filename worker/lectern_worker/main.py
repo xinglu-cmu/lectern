@@ -43,12 +43,16 @@ def main() -> int:
         while True:
             try:
                 with psycopg.connect(DATABASE_URL, connect_timeout=5) as conn:
-                    attempt = 0
-                    log.info("worker alive, db schema=%s", read_schema_version(conn))
-            except psycopg.OperationalError as exc:
+                    schema = read_schema_version(conn)
+                attempt = 0  # reset only after a fully successful poll
+                log.info("worker alive, db schema=%s", schema)
+            except (psycopg.OperationalError, psycopg.errors.UndefinedTable) as exc:
+                # Unreachable database, or reachable but not yet migrated: the api
+                # owns the schema (Flyway, ADR-002) and may start after us.
                 wait = backoff_seconds(attempt)
                 attempt += 1
-                log.warning("db unavailable (%s); retrying in %.0fs", exc, wait)
+                reason = str(exc).splitlines()[0]
+                log.warning("db not ready (%s); retrying in %.0fs", reason, wait)
                 time.sleep(wait)
                 continue
             time.sleep(POLL_INTERVAL_S)
