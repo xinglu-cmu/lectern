@@ -6,12 +6,12 @@ export default function Home() {
           Lectern
         </h1>
         <p className="mt-3 text-lg text-zinc-600 dark:text-zinc-300">
-          Read with receipts.
+          Know what your AI is reading.
         </p>
         <p className="mt-6 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
-          A provenance-first reading workspace — every claim shows its source,
-          and every document is treated as untrusted input. Building in public,
-          week 1 of 8.
+          Scan any document for hidden prompts and AI-directed content, see it
+          zoned by what each part is, choose what survives, and get clean
+          Markdown for any AI tool. Building in public.
         </p>
       </div>
     </main>

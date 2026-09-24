@@ -41,12 +41,5 @@ services:
       postgres:
         condition: service_healthy
 
-  # optional PDF-structure fallback parser (DESIGN §6, ADR-005); start with: docker compose --profile grobid up
-  grobid:
-    image: grobid/grobid:0.8.1
-    profiles: ["grobid"]
-    ports:
-      - "8070:8070"
-
 volumes:
   pgdata:

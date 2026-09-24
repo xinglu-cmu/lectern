@@ -1,6 +1,6 @@
 .PHONY: infra infra-down up down api worker worker-install web web-install test
 
-infra: ## start postgres (pgvector) + redis
+infra: ## start postgres + redis
 	docker compose up -d postgres redis
 
 infra-down:

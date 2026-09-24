@@ -1,9 +1,9 @@
 """Week-1 hello worker: prove DB connectivity and the poll-loop shape.
 
-The real pipeline stages (fetch -> parse -> zone -> screen -> chunk -> embed)
-claim jobs from `ingest_jobs` with FOR UPDATE SKIP LOCKED starting week 2
-(DESIGN 6, ADR-004). This loop already has the structure they will use:
-connect, poll, backoff on failure, exit cleanly.
+From week 4 the worker claims jobs from `ingest_jobs` with FOR UPDATE SKIP
+LOCKED (ADR-004) and runs the engine stages on them (load -> segment ->
+screen -> zone -> summarize -> emit, DESIGN §4). This loop already has the
+structure they will use: connect, poll, backoff on failure, exit cleanly.
 """
 
 import logging
