@@ -109,7 +109,7 @@ lectern clean DOC -o out.md [--keep task,background] [--drop structure,example]
 
 ## 7. Web application
 
-The full-stack path, reusing the v1 architecture minus the cut parts: Next.js (Vercel) → Spring Boot API (auth as designed in v1: JWT + rotating refresh; budgets; rate limits) → Postgres job queue ([ADR-004](adr/ADR-004-postgres-job-queue.md), unchanged) → Python worker running the same engine → R2 for blobs.
+The full-stack path, reusing the v1 architecture minus the cut parts: Next.js (Vercel) → Spring Boot API (auth as designed in v1: JWT + rotating refresh; budgets; rate limits) → Postgres job queue ([ADR-004](adr/ADR-004-postgres-job-queue.md), unchanged) → Python worker running the same engine → R2 for blobs. Web and API share one registrable domain (`app.<domain>`, `api.<domain>`) so the refresh cookie is first-party in every browser: `HttpOnly; Secure; SameSite=Strict`, host-only, scoped to `/api/auth`, with exact-origin CORS ([ADR-009](adr/ADR-009-same-site-domain.md)).
 
 Flow: upload (or URL fetch) → 202 + job chain (`convert → screen+zone → summarize`) → SSE progress → **analysis report page** (overview, zone map, findings with dismiss/quarantine review) → **selection UI** (zone toggles, per-segment overrides, drag-to-reorder sections, live preview) → export clean.md (stored + downloadable). Documents are flat per-user in v1 (no projects). Policy findings render as a banner requiring acknowledgment before export — same detect→disclose→respect stance as the CLI.
 
@@ -158,8 +158,9 @@ Observability is unchanged from v1 in design: OTel traces (worker spans per stag
 
 Deploy:
 
-- **Web:** Next.js on Vercel.
-- **One Hetzner CAX21 (ARM64, 4 vCPU / 8 GB)** running compose: api, worker, and **Postgres 18 self-hosted beside them** ([ADR-008](adr/ADR-008-self-hosted-postgres.md)) — no public port, nightly `pg_dump` to R2 with 14-day retention, and a scripted restore drill. Images are built for `linux/arm64`.
+- **Web:** Next.js on Vercel at `app.<domain>`.
+- **One Hetzner CAX21 (ARM64, 4 vCPU / 8 GB)** running compose: Caddy (automatic TLS for `api.<domain>`), api, worker, and **Postgres 18 self-hosted beside them** ([ADR-008](adr/ADR-008-self-hosted-postgres.md)) — no public port, nightly `pg_dump` to R2 with 14-day retention, and a scripted restore drill. Images are built for `linux/arm64`.
+- **DNS:** Cloudflare; one registrable domain for web and API ([ADR-009](adr/ADR-009-same-site-domain.md)).
 - **Managed extras:** Upstash Redis (rate limits, short-lived cache) and Cloudflare R2 (uploads, exports, database backups).
 
 CI: build/test/lint all three components + eval gates; PyPI publish via trusted publishing on tagged releases (wk 7). k6 load test wk 7: upload-to-ready throughput and API latencies published in README.
@@ -210,3 +211,4 @@ The selection UI is still an instrumented human-oversight surface: telemetry (zo
 3. Whether `scan --fail-on` ships in v1 (cheap, big integration story) — decide wk 3.
 4. Web selection UI depth (reorder + per-segment overrides vs toggles-only) — wk 5, cut-list candidate.
 5. Phase-2 pick for the buffer: local-model distillation vs work-with-doc mode.
+6. Domain name — needed before auth reaches production in week 4 ([ADR-009](adr/ADR-009-same-site-domain.md)).
