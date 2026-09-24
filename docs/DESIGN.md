@@ -5,8 +5,8 @@
 | | |
 |---|---|
 | Author | Xing Lu (xinglu.ece@gmail.com) |
-| Status | **v2.0** — approved baseline for the 8-week build. v1 (paper-reading workspace) is in git history; the pivot is recorded in [ADR-007](adr/ADR-007-pivot-to-screening-tool.md) |
-| Date | 2026-09-23 |
+| Status | **v2.1** — approved baseline for the 8-week build. v2.1 adds the deploy decisions in [ADR-008](adr/ADR-008-self-hosted-postgres.md) and [ADR-009](adr/ADR-009-same-site-domain.md) and structured LLM outputs (§8). v1 (paper-reading workspace) is in git history; the pivot is recorded in [ADR-007](adr/ADR-007-pivot-to-screening-tool.md) |
+| Date | 2026-09-24 (v2.0: 2026-09-23) |
 
 ---
 
@@ -143,6 +143,13 @@ API sketch: `POST /api/auth/*`; `POST /api/documents` (presigned upload or URL) 
 Typical 20-page doc: ~15–30K tokens through Haiku ⇒ **$0.02–0.05/doc**. No Sonnet in the default path (a `--model` escape hatch exists). Web budgets: 50 docs/user/month allowance, global kill-switch degrades to `--no-llm`-equivalent processing. Eval runs via Batches API (50% off). Projected total (LLM + infra) at target load: **~$10–20/month** — comfortably under the ceiling, and cost accounting per document ships anyway (it's a résumé line and an ops habit).
 
 Prompt-side trust boundary (unchanged principle): document text appears only inside delimited data blocks with a standing instruction that it is quoted material to classify, never instructions to follow; screening runs first so `hidden` content never reaches a prompt.
+
+**Structured outputs on every call.** Each LLM call returns JSON constrained by a schema (`output_config.format` with a JSON schema; in Python, `messages.parse()` with a Pydantic model, which also validates the reply client-side). Haiku 4.5 and the Batches API both support this.
+
+- **Zoning** returns one `{id, zone, confidence}` per segment. `zone` is an `enum` of the zones an LLM may assign: `task`, `background`, `structure`, `example`, `ai_directive`, `ai_policy`, `unknown`. `hidden` is deliberately absent — it is detector-derived and hidden spans never reach a prompt, so the schema itself holds that boundary. `confidence` is an ordinal `enum` (`high`/`medium`/`low`): the schema subset has no numeric range constraints, and a model's self-reported probabilities aren't calibrated anyway.
+- **D1 confirmation** returns `verdict ∈ {directive, quoted, benign}`; `quoted` is the S5 path (a document *about* injection).
+- **Overview** returns `{overview, doc_type}` with `doc_type` from a fixed `enum`.
+- Segment ids are batch-local (`s1…sN`) and the schema stays fixed, so its compiled form is cached across requests; the client checks that every id it sent comes back exactly once. Missing or duplicate ids, a `refusal`, or a `max_tokens` stop leave those segments on their heuristic label — the LLM pass can upgrade a result, never break one. The enum is part of the versioned taxonomy (`taxonomy_v`).
 
 ## 9. Evaluation plan
 
