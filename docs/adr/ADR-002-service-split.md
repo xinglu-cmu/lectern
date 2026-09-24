@@ -1,6 +1,6 @@
 # ADR-002: Spring Boot core API + Python ingestion worker
 
-**Status:** accepted · 2026-09-22
+**Status:** accepted · 2026-09-22 · version note 2026-09-24: the API moved from Boot 3.5 to Boot 4.1 before any product code landed (3.5's open-source support ended 2026-06-30); the decision itself is unchanged
 
 ## Context
 
