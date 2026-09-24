@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "lectern-worker"
 version = "0.1.0"
-description = "Lectern ingestion worker — fetch, parse, zone, screen, chunk, embed"
+description = "Lectern worker — runs the engine (load, segment, screen, zone, summarize, emit) as queue jobs"
 requires-python = ">=3.12"
 dependencies = [
     "psycopg[binary]>=3.2",

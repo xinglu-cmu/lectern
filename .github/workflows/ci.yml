@@ -42,5 +42,6 @@ jobs:
       - run: npm run build
         working-directory: web
 
-  # week 6 (DESIGN §11): redteam suite (every PR, deterministic) and
-  # grounded-QA smoke (12 cases) join here; full QA runs weekly via Batches API.
+  # week 6 (DESIGN §9): red-team suite (every PR, deterministic), zoning
+  # smoke (8 docs) and conversion snapshots join here; the full zoning set
+  # runs weekly via the Batches API.

@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Lectern",
   description:
-    "A provenance-first reading workspace — every claim shows its source.",
+    "Know what your AI is reading: screen documents for hidden prompts, zone them by function, export clean Markdown.",
 };
 
 export default function RootLayout({

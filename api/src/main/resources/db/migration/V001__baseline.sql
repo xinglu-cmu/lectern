@@ -1,7 +1,6 @@
--- Baseline: prove migrations run and pgvector is available.
--- Real schema (DESIGN §8) arrives in week-2 migrations.
-
-CREATE EXTENSION IF NOT EXISTS vector;
+-- Baseline: prove migrations run end to end (Flyway applies this from the api;
+-- the worker reads schema_version back). The v2 schema (DESIGN §7) arrives
+-- with the web path in week 4.
 
 CREATE TABLE app_meta (
     key        text PRIMARY KEY,
