@@ -154,7 +154,15 @@ Three suites in `eval/`, all versioned in-repo; thresholds gate CI from week 6.
 
 ## 10. Observability, ops, deploy
 
-Unchanged from v1 in design: OTel traces (worker spans per stage, LLM calls annotated with tokens/cost; API via Java agent), structured logs, queue-depth/DLQ/cost metrics, alerts. Deploy: Vercel (web) + one Hetzner CAX21 running compose (api, worker; GROBID dropped — the converter stack replaces it) + Neon Postgres (no pgvector needed now) + Upstash Redis + R2. CI: build/test/lint all three components + eval gates; PyPI publish via trusted publishing on tagged releases (wk 7). k6 load test wk 7: upload-to-ready throughput and API latencies published in README.
+Observability is unchanged from v1 in design: OTel traces (worker spans per stage, LLM calls annotated with tokens/cost; API via Java agent), structured logs, queue-depth/DLQ/cost metrics, alerts.
+
+Deploy:
+
+- **Web:** Next.js on Vercel.
+- **One Hetzner CAX21 (ARM64, 4 vCPU / 8 GB)** running compose: api, worker, and **Postgres 18 self-hosted beside them** ([ADR-008](adr/ADR-008-self-hosted-postgres.md)) — no public port, nightly `pg_dump` to R2 with 14-day retention, and a scripted restore drill. Images are built for `linux/arm64`.
+- **Managed extras:** Upstash Redis (rate limits, short-lived cache) and Cloudflare R2 (uploads, exports, database backups).
+
+CI: build/test/lint all three components + eval gates; PyPI publish via trusted publishing on tagged releases (wk 7). k6 load test wk 7: upload-to-ready throughput and API latencies published in README.
 
 ## 11. Milestones (v2 — same dated weeks, weeks 2+ replanned)
 
@@ -186,6 +194,7 @@ The selection UI is still an instrumented human-oversight surface: telemetry (zo
 | Dual-artifact scope (CLI + web) | CLI first (wk 2–3) and independently shippable; web reuses the engine untouched |
 | Detector arms race | Claim measured detection, not immunity; red-team suite grows with new techniques |
 | Solo timeline | Protected core = engine + CLI + red-team eval; web selection UI is the first thing to simplify (toggles only, no reorder) if behind |
+| Self-hosted database on a single VM | Nightly `pg_dump` to R2 + scripted restore drill; ~24 h recovery point accepted for v1; WAL archiving once real users depend on the data ([ADR-008](adr/ADR-008-self-hosted-postgres.md)) |
 
 ## 14. Résumé bullet seeds (numbers at wk 8)
 
