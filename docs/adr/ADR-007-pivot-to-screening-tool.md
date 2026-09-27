@@ -10,7 +10,7 @@ One week in (scaffold shipped, no product code yet), the product thesis sharpene
 
 Refocus Lectern on that intersection: **one engine, two front doors** — a Python package/CLI (`scan`, `clean`) as the everyday open-source tool, and the web app as an upload → analysis → interactive selection → export flow. Full detail in DESIGN v2.
 
-Cut from v1: the Q&A agent loop, span-level citation contract, hybrid retrieval, embeddings/pgvector, arXiv-centricity, GROBID. Kept unchanged: the screening detector suite and its red-team eval, the Postgres job queue (ADR-004), the service split (ADR-002, now API + worker sharing the engine package), auth/budgets/observability designs, deploy plan, week-1 scaffold. Parked: the recommendation module (ADR-006) — the new product has no recommendation surface; the event log stays, and the MLE-narrative slot is taken by a better-fitting phase-2 candidate (distilling the zoning classifier into a local model). Research instrumentation survives in the selection UI's telemetry but is descoped from v1 planning.
+Cut from v1: the Q&A agent loop, span-level citation contract, hybrid retrieval, embeddings/pgvector, arXiv-centricity, GROBID. Kept unchanged: the screening detector suite and its red-team eval, the Postgres job queue (ADR-004), the service split (ADR-002, now API + worker sharing the engine package), auth/budgets/observability designs, deploy plan, week-1 scaffold. Parked: the recommendation module (ADR-006) — the new product has no recommendation surface; the event log stays, and the phase-2 ML slot is taken by a better-fitting candidate (distilling the zoning classifier into a local model). Research instrumentation survives in the selection UI's telemetry but is descoped from v1 planning.
 
 ## Rationale
 
@@ -18,7 +18,7 @@ Cut from v1: the Q&A agent loop, span-level citation contract, hybrid retrieval,
 - **Dogfooding and adoption:** the author will use this daily; a CLI reaches users organically (PyPI/GitHub) in a way a niche web app cannot.
 - **The differentiator becomes the product:** "documents are untrusted input" was v1's most defensible idea; v2 makes it the whole identity instead of a feature.
 - **Leaner risk profile:** parsing-fidelity requirements drop (output is Markdown for AI consumption, not character-anchored citations), so arbitrary uploads move from tarpit to core; LLM spend drops to Haiku-only; evals shift toward deterministic suites.
-- **Both résumé narratives strengthen:** open-source tool with measured detection/zoning numbers + the same full-stack rigor (queue, SSE pipeline, eval-gated CI, cost accounting).
+- **Measurable without losing depth:** an open-source tool with published detection/zoning numbers, built with the same full-stack rigor (queue, SSE pipeline, eval-gated CI, cost accounting).
 
 ## Consequences
 

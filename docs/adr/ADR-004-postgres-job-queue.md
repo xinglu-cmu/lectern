@@ -15,7 +15,7 @@ Postgres-backed job table (`ingest_jobs`), claimed with `FOR UPDATE SKIP LOCKED`
 - Job state transitions and the data they mutate (`documents.status`, zones, chunks) commit in **one transaction** — no dual-write or outbox machinery between a broker and the DB.
 - Throughput requirements are tiny (papers/day, not events/sec); SKIP LOCKED handles orders of magnitude more than needed.
 - One less stateful system to operate correctly on a $20/month footprint; BullMQ is also Node-centric, which fits neither Java nor Python here.
-- Boring-tech tradeoff made explicitly — and the reasoning is itself interview material (compare against Redis Streams consumer groups honestly).
+- Boring-tech tradeoff made explicitly, and compared honestly against Redis Streams consumer groups.
 
 ## Consequences
 
