@@ -5,8 +5,8 @@
 | | |
 |---|---|
 | Author | Xing Lu (xinglu.ece@gmail.com) |
-| Status | **v2.1** — approved baseline for the 8-week build. v2.1 adds the deploy decisions in [ADR-008](adr/ADR-008-self-hosted-postgres.md) and [ADR-009](adr/ADR-009-same-site-domain.md) and structured LLM outputs (§8). v1 (paper-reading workspace) is in git history; the pivot is recorded in [ADR-007](adr/ADR-007-pivot-to-screening-tool.md) |
-| Date | 2026-09-24 (v2.0: 2026-09-23) |
+| Status | **v2.2** — approved baseline for the 8-week build. v2.2 replaces §14 with success measures; v2.1 adds the deploy decisions in [ADR-008](adr/ADR-008-self-hosted-postgres.md) and [ADR-009](adr/ADR-009-same-site-domain.md) and structured LLM outputs (§8). v1 (paper-reading workspace) is in git history; the pivot is recorded in [ADR-007](adr/ADR-007-pivot-to-screening-tool.md) |
+| Date | 2026-09-26 (v2.1: 2026-09-24, v2.0: 2026-09-23) |
 
 ---
 
@@ -25,7 +25,7 @@ Three principles carry over unchanged from v1:
 2. **The human disposes.** The tool proposes an analysis; the user selects what survives. High-level understanding before deep processing — by design, not as an afterthought.
 3. **Works without an LLM.** Conversion, heuristic zoning, all static detectors, and clean-Markdown output run fully offline (`--no-llm`). The LLM (Claude Haiku) upgrades zoning quality and writes the overview; it is an enhancer, not a dependency.
 
-Goals, one codebase: a genuinely useful daily tool with organic GitHub/PyPI adoption (primary); a deployed, non-toy full-stack system for internship applications (primary); evals with published numbers as the credibility layer (the moat); research hooks retained in telemetry but deprioritized (see §12).
+Goals, one codebase: a genuinely useful daily tool with organic GitHub/PyPI adoption (primary); a deployed, production-grade web path so people who never open a terminal get the same protection (primary); evals with published numbers as the credibility layer (the moat); research hooks retained in telemetry but deprioritized (see §12). How we'll know it worked: §14.
 
 ## 2. Goals and non-goals
 
@@ -140,7 +140,7 @@ API sketch: `POST /api/auth/*`; `POST /api/documents` (presigned upload or URL) 
 | D1 directive confirmation | `claude-haiku-4-5` | flagged spans only |
 | Overview summary | `claude-haiku-4-5` | once per doc |
 
-Typical 20-page doc: ~15–30K tokens through Haiku ⇒ **$0.02–0.05/doc**. No Sonnet in the default path (a `--model` escape hatch exists). Web budgets: 50 docs/user/month allowance, global kill-switch degrades to `--no-llm`-equivalent processing. Eval runs via Batches API (50% off). Projected total (LLM + infra) at target load: **~$10–20/month** — comfortably under the ceiling, and cost accounting per document ships anyway (it's a résumé line and an ops habit).
+Typical 20-page doc: ~15–30K tokens through Haiku ⇒ **$0.02–0.05/doc**. No Sonnet in the default path (a `--model` escape hatch exists). Web budgets: 50 docs/user/month allowance, global kill-switch degrades to `--no-llm`-equivalent processing. Eval runs via Batches API (50% off). Projected total (LLM + infra) at target load: **~$10–20/month** — comfortably under the ceiling, and cost accounting per document ships anyway (it's how we know the footprint holds as usage grows).
 
 Prompt-side trust boundary (unchanged principle): document text appears only inside delimited data blocks with a standing instruction that it is quoted material to classify, never instructions to follow; screening runs first so `hidden` content never reaches a prompt.
 
@@ -183,9 +183,9 @@ CI: build/test/lint all three components + eval gates; PyPI publish via trusted 
 | 5 | Oct 19–25 | Selection UI (toggles, overrides, reorder, preview) + export; findings review + policy acknowledgment; telemetry events | Flagship demo: messy doc w/ hidden prompt → review → clean.md |
 | 6 | Oct 26–Nov 1 | Eval suites gating CI (thresholds); OTel + dashboards + alerts; budgets + rate limits + cost accounting | CI blocks on regressions; traces + budget block visible |
 | 7 | Nov 2–8 | Polish + onboarding + privacy/consent; **PyPI v0.1 release** + docs + demo GIF; sample-doc gallery; k6 + tuning | Installable via pip; ≥ 10 real users; numbers in README |
-| 8 | Nov 9–15 | Wrap: README metrics, launch write-up, résumé bullets; research-note draft (optional, from own usage) | Deliverables checklist done; launch-ready |
+| 8 | Nov 9–15 | Wrap: success measures (§14) in the README, launch write-up; research-note draft (optional, from own usage) | Deliverables checklist done; launch-ready |
 
-Buffer (Nov 16–Dec): growth to ≥ 20 users; phase-2 spikes — distill the zoning classifier into a local model (the MLE story: LLM → distilled small model, cost/latency ablation), and/or "work with the cleaned doc" mode.
+Buffer (Nov 16–Dec): growth to ≥ 20 users; phase-2 spikes — distill the zoning classifier into a local model (LLM → distilled small model, with a cost/latency ablation), and/or "work with the cleaned doc" mode.
 
 ## 12. Research hooks (retained, deprioritized)
 
@@ -204,12 +204,18 @@ The selection UI is still an instrumented human-oversight surface: telemetry (zo
 | Solo timeline | Protected core = engine + CLI + red-team eval; web selection UI is the first thing to simplify (toggles only, no reorder) if behind |
 | Self-hosted database on a single VM | Nightly `pg_dump` to R2 + scripted restore drill; ~24 h recovery point accepted for v1; WAL archiving once real users depend on the data ([ADR-008](adr/ADR-008-self-hosted-postgres.md)) |
 
-## 14. Résumé bullet seeds (numbers at wk 8)
+## 14. Success measures
 
-- Built and shipped **Lectern** (PyPI + deployed web app): a document-screening tool that detects hidden prompt injections and AI-directed content, zones documents by functional role, and emits clean Markdown context for LLM workflows — **N** installs / **M** users.
-- Designed an injection-detection layer over PDF/HTML/DOCX (content-stream style analysis + pattern/LLM classification) with a self-built **60-case red-team corpus: X% recall / Y% precision**, evaluated on every PR.
-- Built a two-pass functional zoning classifier (heuristics + batched Haiku on low-confidence segments), **macro-F1 X** on a labeled 60-doc set, with a published heuristic-vs-LLM ablation; full pipeline works offline.
-- Full-stack async pipeline (Spring Boot / Java 21, Postgres `FOR UPDATE SKIP LOCKED` queue, Python worker, Next.js) with OTel tracing, per-user cost accounting, and CI gated by eval thresholds — on a < $20/month footprint.
+Lectern works if people use it on their own documents and it catches what it says it catches. These numbers go in the README at week 8 and stay current after launch.
+
+| Measure | What it tells us | v1 target | Source |
+|---|---|---|---|
+| Real users | People running `scan`/`clean` or completing a web review on their own documents | ≥ 10 by wk 7 (G8), ≥ 20 by end of buffer | Web accounts with ≥ 1 export; CLI users who report back (PyPI downloads are only a noisy upper bound: mirrors and CI inflate them) |
+| Detection quality | Whether hidden and AI-directed content is actually caught, and how often clean text is falsely flagged | recall ≥ 0.90, precision ≥ 0.80 per technique (§9) | Red-team suite, every PR |
+| Zoning quality | Whether "keep the task, drop the rest" keeps the right parts | macro-F1 ≥ 0.75; heuristic-only vs +LLM delta published (§9) | Labeled zoning set |
+| Zoning in practice | How often reviewers disagree with the proposed zones | tracked, no v1 target | Override and toggle rate from selection-UI telemetry (consented users only, §12) |
+| Context saved | How much irrelevant material stays out of the AI's context | tracked, no v1 target | Tokens in vs tokens out per export |
+| Cost and speed | Whether it stays cheap and fast enough to use daily | $0.02–0.05/doc, < $20/month total (§8, G7); upload-to-report latency measured | Per-document cost accounting; k6 run in wk 7 |
 
 ## 15. Open decisions
 
