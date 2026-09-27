@@ -4,7 +4,7 @@
 
 ## Context
 
-Solo developer, 8 weeks. The default guidance for that budget is a single service. But the system has two workload shapes: interactive request/response (auth, CRUD, agent runs, SSE) and asynchronous batch document processing (fetch, parse, screen, chunk, embed). The developer is strong in Java and TypeScript; big-tech interview signal favors a "serious backend language". Python owns the document-parsing and (later) ML ecosystem.
+Solo developer, 8 weeks. The default guidance for that budget is a single service. But the system has two workload shapes: interactive request/response (auth, CRUD, agent runs, SSE) and asynchronous batch document processing (fetch, parse, screen, chunk, embed). The developer is strong in Java and TypeScript, and the JVM is a mature home for a long-lived request-serving API. Python owns the document-parsing and (later) ML ecosystem.
 
 ## Decision
 

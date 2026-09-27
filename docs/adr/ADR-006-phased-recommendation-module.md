@@ -4,7 +4,7 @@
 
 ## Context
 
-A recommendation pipeline (event log → cleaning → features → recall → rank → re-rank → eval) is wanted for MLE-track interview breadth, per a senior's advice that interviewers walk the pipeline end to end on data you own. The temptation is to build it alongside v1 (+~3 weeks, interleaved). Two realities push back: (1) the 8-week v1 plan has no slack and a solo developer; (2) with ≤ 50 users, within-library collaborative signals are too sparse to train on, and an online A/B test has no statistical power.
+A recommendation pipeline (event log → cleaning → features → recall → rank → re-rank → eval) is wanted as an end-to-end ML module built on data the product owns. The temptation is to build it alongside v1 (+~3 weeks, interleaved). Two realities push back: (1) the 8-week v1 plan has no slack and a solo developer; (2) with ≤ 50 users, within-library collaborative signals are too sparse to train on, and an online A/B test has no statistical power.
 
 ## Decision
 
@@ -16,13 +16,13 @@ The product surface recommends from the **arXiv stream**, not only within a user
 
 - Protects v1: the protected core (ingestion, search, agent loop, citations) never competes with model training for weeks.
 - Fixes the data problem by product design rather than by pretending: the digest *generates* the labels phase 2 trains on — shipping phase 1 before the break is what makes a January model trainable.
-- Honesty as strategy: résumé claims use offline time-split metrics and system numbers; the A/B plumbing is built and demonstrated, never presented as a powered experiment.
+- Honesty as strategy: published claims use offline time-split metrics and system numbers; the A/B plumbing is built and demonstrated, never presented as a powered experiment.
 
 ## Consequences
 
 - v1 carries only the cheap obligations: append-only events, `exp_id`, impression logging.
-- Each phase is a separable deep-dive module with its own eval and interview narrative (SDE / MLE / HAI from one codebase).
+- Each phase is a separable module with its own eval.
 
 ## Revisit when
 
-User count or a public dataset changes the label economics, or the Kuaishou generative-rec side track materializes with a real deadline (evaluate only after v1 ships).
+User count or a public dataset changes the label economics, or a generative-rec side track materializes with a real deadline (evaluate only after v1 ships).

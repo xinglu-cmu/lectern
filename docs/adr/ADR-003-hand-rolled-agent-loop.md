@@ -14,7 +14,7 @@ Hand-roll the loop as an explicit state machine persisted in Postgres, streamed 
 
 - The pausable, human-editable plan checkpoint is the *research object*. We need to own the plan representation, the interrupt/resume semantics, and the logging of every edit — precisely the parts a framework abstracts away.
 - The loop is ~4 LLM calls with read-only tools; as an engineering artifact it is a state machine over a database row, which Spring handles natively. A framework would add a dependency layer larger than the code it replaces.
-- Interview value: "show me your agent loop" has a real answer.
+- Every step of the loop is our own code, so it can be read, logged and debugged end to end.
 
 ## Consequences
 
