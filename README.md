@@ -25,9 +25,9 @@ A web app (upload → async pipeline → interactive review → export) ships al
 
 Python engine + CLI · Next.js/TypeScript web · Spring Boot (Java 21) API · PostgreSQL (`FOR UPDATE SKIP LOCKED` job queue) · Redis · Cloudflare R2 · Claude API (`claude-haiku-4-5`) · OpenTelemetry · CI gated by eval thresholds
 
-## Learning modules
+## Subsystems
 
-Each subsystem is a self-contained deep-dive with its own eval and narrative:
+Each subsystem owns one hard part and is tested on its own:
 
 | Module | The hard part it owns |
 |---|---|
@@ -41,7 +41,7 @@ Each subsystem is a self-contained deep-dive with its own eval and narrative:
 
 ## Metrics
 
-Filled in as they become real (weeks 3–8): red-team detection precision/recall per technique, zoning macro-F1 (heuristic vs +LLM ablation), pipeline throughput, P95 API latency, cost per document, installs/users.
+Filled in as they become real (weeks 3–8), following the [success measures](docs/DESIGN.md#14-success-measures): real users, red-team detection precision/recall per technique, zoning macro-F1 (heuristic vs +LLM ablation), cost per document, pipeline throughput and P95 API latency.
 
 ## Development
 
