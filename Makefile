@@ -1,4 +1,4 @@
-.PHONY: infra infra-down up down api worker worker-install web web-install test
+.PHONY: infra infra-down up down api worker worker-install web web-install test scan
 
 infra: ## start postgres + redis
 	docker compose up -d postgres redis
@@ -15,7 +15,7 @@ down:
 api: ## run api locally (needs JDK 21 + Maven; otherwise use `make up`)
 	cd api && mvn spring-boot:run
 
-worker-install:
+worker-install: ## engine + CLI + worker, editable, with dev tools
 	python3 -m pip install -e "./worker[dev]"
 
 worker: ## run worker locally against `make infra`
@@ -27,5 +27,8 @@ web-install:
 web: ## next.js dev server on :3000
 	npm run dev --prefix web
 
-test: ## fast local checks (worker tests; api tests run in docker/CI)
-	cd worker && python3 -m pytest -q
+test: ## fast local checks (engine + worker tests; api tests run in docker/CI)
+	cd worker && ruff check . && ruff format --check . && python3 -m pytest -q
+
+scan: ## try the CLI offline on a document: make scan DOC=path/to/file.pdf
+	lectern scan "$(DOC)" --no-llm

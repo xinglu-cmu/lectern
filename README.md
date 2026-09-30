@@ -19,7 +19,7 @@ lectern clean assignment.pdf -o clean.md \
 
 A web app (upload → async pipeline → interactive review → export) ships alongside the CLI — same engine, two front doors.
 
-**Status:** week 2 of an 8-week build. The [design doc](docs/DESIGN.md) (v2) and [ADRs](docs/adr/) — including [ADR-007](docs/adr/ADR-007-pivot-to-screening-tool.md), the pivot record — explain every decision.
+**Status:** week 2 of an 8-week build — `lectern scan` works end to end (offline and with Claude Haiku); `lectern clean` and the hidden-text detectors land in week 3. The [design doc](docs/DESIGN.md) (v2) and [ADRs](docs/adr/) — including [ADR-007](docs/adr/ADR-007-pivot-to-screening-tool.md), the pivot record — explain every decision.
 
 ## Stack
 
@@ -51,7 +51,17 @@ make up      # build & run api + worker in docker too
 make web     # next.js dev server on :3000  (first: make web-install)
 ```
 
-Engine/CLI (from week 2): `pip install -e "./worker[dev]"` then `lectern scan …`. CI runs api (Maven verify), worker (ruff + pytest), and web (build) on every push; eval gates join in week 6.
+Engine and CLI live in `worker/` as the `lectern` package (PyPI name `lectern-cli`; the import and the command are both `lectern`):
+
+```bash
+pip install -e "./worker[dev]"           # engine + CLI + worker + test tools
+lectern scan assignment.pdf --no-llm      # offline: heuristic zoning + pattern detectors
+export ANTHROPIC_API_KEY=…                # adds the Claude Haiku zoning pass + overview
+lectern scan assignment.pdf               # ~$0.02–0.05 for a 20-page document
+lectern scan assignment.pdf --json        # the full analysis, for scripts and agents
+```
+
+Supported inputs: PDF (own pdfplumber pass that keeps colour, size and position of every word, see [ADR-010](docs/adr/ADR-010-converter-pick.md)), DOCX / HTML / PPTX (via MarkItDown), Markdown and text. CI runs api (Maven verify), worker (ruff + pytest + an offline `lectern scan` smoke test), and web (build) on every push; eval gates join in week 6.
 
 ## License
 
