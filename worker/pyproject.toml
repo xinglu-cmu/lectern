@@ -3,28 +3,62 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "lectern-worker"
+name = "lectern-cli"
 version = "0.1.0"
-description = "Lectern worker — runs the engine (load, segment, screen, zone, summarize, emit) as queue jobs"
+description = "Lectern — know what your AI is reading. Scan documents for hidden prompts and AI-directed content, zone them by function, and emit clean Markdown."
+readme = "README.md"
+license = "MIT"
 requires-python = ">=3.12"
+authors = [{ name = "Xing Lu", email = "xinglu.ece@gmail.com" }]
+keywords = ["prompt-injection", "document", "markdown", "llm", "security", "cli"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+# The engine + CLI. PyPI name: `lectern` is taken by an unrelated project, so the
+# distribution is `lectern-cli`; the import package and the command are both `lectern`.
 dependencies = [
-    "psycopg[binary]>=3.2",
+    "pydantic>=2.7",
+    "pdfplumber>=0.11",
+    "markitdown[docx]>=0.1.5",
+    "anthropic>=1.9,<2",
+    "rich>=13",
 ]
 
 [project.optional-dependencies]
+worker = [
+    "psycopg[binary]>=3.2",
+]
 dev = [
     "pytest>=8",
     "ruff>=0.6",
+    "psycopg[binary]>=3.2",
 ]
 
+[project.urls]
+Homepage = "https://github.com/xinglu-cmu/lectern"
+Documentation = "https://github.com/xinglu-cmu/lectern/blob/main/docs/DESIGN.md"
+Issues = "https://github.com/xinglu-cmu/lectern/issues"
+
 [project.scripts]
+lectern = "lectern.cli:main"
 lectern-worker = "lectern_worker.main:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["lectern_worker"]
+packages = ["lectern", "lectern_worker"]
 
 [tool.ruff]
 line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

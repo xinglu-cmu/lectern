@@ -15,9 +15,7 @@ import psycopg
 
 log = logging.getLogger("lectern.worker")
 
-DATABASE_URL = os.environ.get(
-    "DATABASE_URL", "postgresql://lectern:lectern@localhost:5432/lectern"
-)
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://lectern:lectern@localhost:5432/lectern")
 POLL_INTERVAL_S = float(os.environ.get("POLL_INTERVAL_S", "10"))
 
 
