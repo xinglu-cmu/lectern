@@ -1,11 +1,8 @@
-import sys
 from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).parent))  # for `pdfgen`
-
-from pdfgen import Page, lines, write_pdf  # noqa: E402
+from lectern.devtools.pdfgen import Page, lines, write_pdf  # noqa: E402
 
 ASSIGNMENT_MD = """# Assignment 2: Sorting
 

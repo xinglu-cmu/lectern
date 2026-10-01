@@ -46,6 +46,11 @@ class Style(BaseModel):
     bbox: tuple[float, float, float, float] | None = Field(
         default=None, description="x0, top, x1, bottom in PDF points"
     )
+    background: str | None = Field(
+        default=None,
+        description="what is drawn behind the text: #rrggbb of the nearest filled shape, "
+        "'image' when a picture is behind it, None when nothing is (the page itself)",
+    )
 
 
 class Run(BaseModel):
@@ -54,6 +59,9 @@ class Run(BaseModel):
 
     text: str
     style: Style = Field(default_factory=Style)
+    flags: list[str] = Field(
+        default_factory=list, description="converter observations, e.g. off_page"
+    )
 
 
 class Anchor(BaseModel):
@@ -72,9 +80,15 @@ class Block(BaseModel):
     runs: list[Run] = Field(default_factory=list)
     flags: list[str] = Field(
         default_factory=list,
-        description="converter observations, e.g. header, footer, repeated, page_number",
+        description="converter observations (header, footer, repeated, page_number, off_page) and "
+        "hiding evidence (hidden:<reason>, set by converters for format-level hiding and by the "
+        "block detectors for style-level hiding)",
     )
     anchor: Anchor
+
+    @property
+    def hidden(self) -> bool:
+        return any(f.startswith("hidden:") for f in self.flags)
 
 
 class Document(BaseModel):
@@ -167,6 +181,7 @@ class Finding(BaseModel):
     )
     status: FindingStatus = FindingStatus.open
     note: str | None = None
+    block: int | None = Field(default=None, description="block index in the loaded document")
 
 
 # ---------------------------------------------------------------------- summarize

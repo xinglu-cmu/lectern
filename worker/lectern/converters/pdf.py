@@ -47,6 +47,37 @@ class _Word:
     size: float
     font: str
     color: str | None
+    background: str | None = None
+
+
+MAX_SHAPES = 3000  # beyond this, skip background lookup (dense vector drawings)
+
+
+def _backgrounds(page) -> list[tuple[float, float, float, float, str]]:
+    """Filled rectangles/curves and images on the page, as (x0, top, x1, bottom, colour)."""
+    shapes: list[tuple[float, float, float, float, str]] = []
+    for obj in list(page.rects) + list(page.curves):
+        if not obj.get("fill"):
+            continue
+        color = color_to_hex(obj.get("non_stroking_color"))
+        if color is None:
+            continue
+        shapes.append((obj["x0"], obj["top"], obj["x1"], obj["bottom"], color))
+    for img in page.images:
+        shapes.append((img["x0"], img["top"], img["x1"], img["bottom"], "image"))
+    return shapes if len(shapes) <= MAX_SHAPES else []
+
+
+def _background_at(shapes, x: float, y: float) -> str | None:
+    """The smallest shape under the point: the one actually drawn behind the text."""
+    best = None
+    best_area = None
+    for x0, top, x1, bottom, color in shapes:
+        if x0 <= x <= x1 and top <= y <= bottom:
+            area = (x1 - x0) * (bottom - top)
+            if best_area is None or area < best_area:
+                best, best_area = color, area
+    return best
 
 
 @dataclass
@@ -134,7 +165,7 @@ class PdfConverter:
         pages_lines: list[tuple[list[_Line], list[_Line], list[_Line], float, float]] = []
         meta: dict[str, str] = {}
         with pdfplumber.open(str(path)) as pdf:
-            for key in ("Title", "Author", "Subject", "Producer", "Creator"):
+            for key in ("Title", "Author", "Subject", "Keywords", "Producer", "Creator"):
                 val = (pdf.metadata or {}).get(key)
                 if isinstance(val, str) and val.strip():
                     meta[key.lower()] = val.strip()
@@ -185,6 +216,7 @@ class PdfConverter:
             use_text_flow=True,
             extra_attrs=["size", "fontname", "non_stroking_color"],
         )
+        shapes = _backgrounds(page)
         lines: list[_Line] = []
         for w in words:
             word = _Word(
@@ -197,6 +229,10 @@ class PdfConverter:
                 font=str(w.get("fontname") or ""),
                 color=color_to_hex(w.get("non_stroking_color")),
             )
+            if shapes:
+                word.background = _background_at(
+                    shapes, (word.x0 + word.x1) / 2, (word.top + word.bottom) / 2
+                )
             if lines and self._same_line(lines[-1], word):
                 lines[-1].words.append(word)
             else:
@@ -326,7 +362,7 @@ class PdfConverter:
         words = [w for ln in pb.lines for w in ln.words]
         runs: list[Run] = []
         for w in words:
-            key = (round(w.size, 1), w.font, w.color)
+            key = (round(w.size, 1), w.font, w.color, w.background)
             if (
                 runs
                 and runs[-1].style.font_size is not None
@@ -335,6 +371,7 @@ class PdfConverter:
                     round(runs[-1].style.font_size, 1),
                     runs[-1].style.font_name,
                     runs[-1].style.color,
+                    runs[-1].style.background,
                 )
             ):
                 prev = runs[-1]
@@ -355,6 +392,7 @@ class PdfConverter:
                             font_name=w.font or None,
                             color=w.color,
                             bbox=(w.x0, w.top, w.x1, w.bottom),
+                            background=w.background,
                         ),
                     )
                 )
@@ -372,7 +410,11 @@ class PdfConverter:
             max(w.bottom for w in words),
         )
         flags = list(pb.flags)
-        if bbox[2] < 0 or bbox[0] > width or bbox[3] < 0 or bbox[1] > height:
+        for run in runs:
+            rb = run.style.bbox
+            if rb and (rb[2] <= 0 or rb[0] >= width or rb[3] <= 0 or rb[1] >= height):
+                run.flags.append("off_page")
+        if bbox[2] <= 0 or bbox[0] >= width or bbox[3] <= 0 or bbox[1] >= height:
             flags.append("off_page")
         text = " ".join(ln.text for ln in pb.lines)
         return Block(

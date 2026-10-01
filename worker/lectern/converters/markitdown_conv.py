@@ -1,10 +1,9 @@
-"""DOCX / HTML / PPTX via MarkItDown (MIT, Microsoft), then our block parser.
+"""PPTX (and other MarkItDown formats) via MarkItDown, then our block parser.
 
-MarkItDown gives us good-enough Markdown for office and web formats in one
-dependency. What it cannot give us is style: colour, size, `display:none`. For
-HTML that pass arrives with detector H4 in week 3 (a BeautifulSoup walk over
-the same file); for DOCX a python-docx pass over run properties (vanish, colour).
-Both sit behind this same interface — the engine won't notice (ADR-010).
+MarkItDown gives good-enough Markdown in one dependency, but no style: colour,
+size, hidden flags are gone. That is why PDF, HTML and DOCX have their own
+converters; this one covers the long tail where hidden-text detection is not
+yet attempted (ADR-010).
 """
 
 from __future__ import annotations
@@ -17,7 +16,7 @@ from lectern.models import Document
 
 class MarkItDownConverter:
     name = "markitdown"
-    formats = frozenset({"docx", "html", "htm", "pptx"})
+    formats = frozenset({"pptx", "xlsx", "epub", "rtf"})
 
     def convert(self, path: Path) -> Document:
         from markitdown import MarkItDown  # heavy import, keep it local

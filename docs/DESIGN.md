@@ -5,8 +5,8 @@
 | | |
 |---|---|
 | Author | Xing Lu (xinglu.ece@gmail.com) |
-| Status | **v2.3** — approved baseline for the 8-week build. v2.3 records the converter and package-name decisions ([ADR-010](adr/ADR-010-converter-pick.md)); v2.2 replaces §14 with success measures; v2.1 adds the deploy decisions in [ADR-008](adr/ADR-008-self-hosted-postgres.md) and [ADR-009](adr/ADR-009-same-site-domain.md) and structured LLM outputs (§8). v1 (paper-reading workspace) is in git history; the pivot is recorded in [ADR-007](adr/ADR-007-pivot-to-screening-tool.md) |
-| Date | 2026-09-29 (v2.2: 2026-09-26, v2.1: 2026-09-24, v2.0: 2026-09-23) |
+| Status | **v2.4** — approved baseline for the 8-week build. v2.4 marks week 2 done, resolves open decision 3 and records block-level, background-aware screening (§4, [ADR-011](adr/ADR-011-hidden-text-screening.md)); v2.3 records the converter and package-name decisions ([ADR-010](adr/ADR-010-converter-pick.md)); v2.2 replaces §14 with success measures; v2.1 adds the deploy decisions in [ADR-008](adr/ADR-008-self-hosted-postgres.md) and [ADR-009](adr/ADR-009-same-site-domain.md) and structured LLM outputs (§8). v1 (paper-reading workspace) is in git history; the pivot is recorded in [ADR-007](adr/ADR-007-pivot-to-screening-tool.md) |
+| Date | 2026-10-01 (v2.3: 2026-09-29, v2.2: 2026-09-26, v2.1: 2026-09-24, v2.0: 2026-09-23) |
 
 ---
 
@@ -73,7 +73,7 @@ load → segment → screen → zone → summarize → emit
 
 - **load** — convert any input to a normalized internal document (blocks with type, text, style hints, page/element anchors). Rides on established MIT-licensed converters behind a single `Converter` interface (MarkItDown for DOCX/HTML/PPTX; Docling deferred) plus our own pdfplumber pass for PDF, which keeps the style metadata the converters discard (color, font size, coordinates — the raw material for hidden-text detection; [ADR-010](adr/ADR-010-converter-pick.md)). We own the interface, not the parsers ([ADR-005](adr/ADR-005-arxiv-html-first.md) superseded; same buy-the-boring-part instinct).
 - **segment** — structure-aware splitting into classification units (heading-bounded, paragraph-grouped, ~100–400 tokens), each keeping its anchor.
-- **screen** — the v1 detector suite, unchanged in design: H1 invisible color, H2 tiny font, H3 off-canvas, H4 HTML-hiding (`display:none`, zero size, fg≈bg), H5 metadata payloads, H6 encoding anomalies (zero-width, PUA, homoglyphs); D1 AI-directive patterns (regex prefilter → Haiku on flagged spans only); P1 AI-use-policy statements. **Ordering is a security property: static detectors run before any LLM reads the document; spans flagged `hidden` are quarantined and excluded from every later LLM call.** Action matrix: hidden ∧ directive ⇒ auto-quarantine (critical); visible directive ⇒ warn (the S5 path); policy ⇒ always-surfaced info finding.
+- **screen** — the v1 detector suite, unchanged in design: H1 invisible color, H2 tiny font, H3 off-canvas, H4 format-level hiding (HTML `display:none`, zero size, fg≈bg, comments; Word hidden runs), H5 metadata payloads, H6 encoding anomalies (zero-width, bidi, PUA, tag-character smuggling, homoglyphs); D1 AI-directive patterns (regex prefilter → Haiku on flagged spans only); P1 AI-use-policy statements. H1–H6 run on blocks *before segmentation* and carve hidden text into its own blocks, so a hidden run never shares a segment with visible text; H1 judges colour against what is actually drawn behind the text; D1/P1 run on segments ([ADR-011](adr/ADR-011-hidden-text-screening.md)). **Ordering is a security property: static detectors run before any LLM reads the document; spans flagged `hidden` are quarantined and excluded from every later LLM call.** Action matrix: hidden ∧ directive ⇒ auto-quarantine (critical); visible directive ⇒ warn (the S5 path); policy ⇒ always-surfaced info finding.
 - **zone** — assign each segment a functional role (§5): heuristics first (position, style, pattern — free, offline), then optional Haiku classification for low-confidence segments (batched, document text as delimited data). Output: zone + confidence + method per segment.
 - **summarize** — one-paragraph overview + document-type guess (Haiku; skipped in `--no-llm`).
 - **emit** — analysis report (terminal, Markdown, or JSON) and/or clean Markdown: selected zones in reading order (user-overridable), normalized headings, plus the removal report footer (counts, dropped zones, all findings with locations — policy findings unconditionally).
@@ -177,7 +177,7 @@ CI: build/test/lint all three components + eval gates; PyPI publish via trusted 
 | Wk | Dates (2026) | Build | Exit criterion (demoable) |
 |----|--------------|-------|---------------------------|
 | 1 ✅ | Sep 21–27 | Scaffold, CI, repo, board (product-agnostic — survives the pivot intact) | Done: CI green, repo public |
-| 2 | Sep 28–Oct 4 | Engine package: converter interface + style-metadata extraction, segmentation, heuristic zoning + Haiku pass, overview; `lectern scan` (terminal + JSON) | `lectern scan` on a real course PDF prints a sensible overview + zone map |
+| 2 ✅ | Sep 28–Oct 4 | Engine package: converter interface + style-metadata extraction, segmentation, heuristic zoning + Haiku pass, overview; `lectern scan` (terminal + JSON) | `lectern scan` on a real course PDF prints a sensible overview + zone map |
 | 3 | Oct 5–11 | Detectors H1–H6/D1/P1 in engine; `lectern clean` + removal report; `--no-llm` mode; red-team generator + metrics; zoning labeled set v0 (30 docs) | **Midpoint demo: full CLI on an attacked doc — catch, quarantine, clean output; first published detection numbers** |
 | 4 | Oct 12–18 | Web path: auth, upload→R2, job queue + worker runs engine, SSE progress, analysis report page, documents list | Browser upload → live report |
 | 5 | Oct 19–25 | Selection UI (toggles, overrides, reorder, preview) + export; findings review + policy acknowledgment; telemetry events | Flagship demo: messy doc w/ hidden prompt → review → clean.md |
@@ -221,7 +221,7 @@ Lectern works if people use it on their own documents and it catches what it say
 
 1. ~~Converter pick~~ — resolved in [ADR-010](adr/ADR-010-converter-pick.md): own pdfplumber pass for PDF (keeps per-word colour/size/position for H1–H3), MarkItDown for DOCX/HTML/PPTX, Docling deferred behind the interface.
 2. ~~PyPI package name~~ — `lectern` is taken; the distribution is `lectern-cli`, import and command stay `lectern` ([ADR-010](adr/ADR-010-converter-pick.md)).
-3. Whether `scan --fail-on` ships in v1 (cheap, big integration story) — decide wk 3.
+3. ~~Whether `scan --fail-on` ships in v1~~ — shipped in week 3: `lectern scan --fail-on {info,warning,critical}` exits 3, the CI / ingest-gate story.
 4. Web selection UI depth (reorder + per-segment overrides vs toggles-only) — wk 5, cut-list candidate.
 5. Phase-2 pick for the buffer: local-model distillation vs work-with-doc mode.
 6. Domain name — needed before auth reaches production in week 4 ([ADR-009](adr/ADR-009-same-site-domain.md)).

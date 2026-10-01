@@ -1,0 +1,23 @@
+# Request for Proposals: Library Catalog Modernization
+
+## Background
+
+The city library system serves 240,000 cardholders across eleven branches. Its catalog software was installed in 2011 and is no longer supported by the vendor. Staff report that searches are slow, that holds are lost when branches synchronize overnight, and that the public interface does not work on phones. This request seeks a partner to replace the catalog with a modern, hosted system.
+
+## Scope of Work
+
+The vendor shall migrate the existing bibliographic and patron records, provide a public catalog that meets WCAG 2.2 AA, integrate with the current self-checkout kiosks, and train staff at every branch. The proposal must include a project plan with milestones, a staffing plan with named leads, a fixed price, and a maintenance agreement for at least three years.
+
+Proposals must be submitted electronically by November 3, 2026, 5:00 pm. Proposals should not exceed 25 pages excluding appendices. Questions may be sent to the procurement office until October 20; answers will be posted publicly.
+
+## Evaluation Criteria
+
+Proposals will be scored on technical approach (40 points), relevant experience (25 points), price (25 points) and training plan (10 points). The library may invite the three highest-scoring vendors to present.
+
+## Example Timeline
+
+A typical engagement runs sixteen weeks: four weeks of discovery and data audit, eight weeks of migration and configuration, two weeks of staff training, and two weeks of parallel operation before cutover.
+
+## Terms
+
+This request does not commit the library to award a contract. All proposals become public records after award. The library reserves the right to reject any or all proposals.
