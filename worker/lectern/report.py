@@ -13,7 +13,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from lectern.models import Analysis, Segment, Severity, Zone
+from lectern.models import Analysis, FindingStatus, Segment, Severity, Zone
 
 ZONE_STYLE = {
     Zone.task: "bold green",
@@ -107,20 +107,59 @@ def _findings_table(a: Analysis) -> Table | Text:
     t.add_column("det.")
     t.add_column("kind")
     t.add_column("severity")
+    t.add_column("status")
     t.add_column("where")
     t.add_column("excerpt", overflow="fold")
     for f in a.findings:
         where = f.segment_id or ""
         if f.page:
             where += f" · p{f.page}"
+        status = Text(
+            f.status.value,
+            style="bold magenta" if f.status is FindingStatus.quarantined else "dim",
+        )
+        excerpt = Text(f.excerpt)
+        if f.note:
+            excerpt.append(f"\n{f.note}", style="dim")
         t.add_row(
             f.detector,
             f.kind,
             Text(f.severity.value, style=SEVERITY_STYLE[f.severity]),
-            where,
-            f.excerpt,
+            status,
+            where or "doc",
+            excerpt,
         )
     return t
+
+
+def render_selection_prompt(analysis: Analysis, selected: set[Zone], console: Console) -> set[Zone]:
+    """`clean --interactive`: one yes/no per zone that has content, in the terminal."""
+    from lectern.emit import NEVER_KEEP
+
+    console.print("[bold]Choose what to keep.[/] Enter = keep the default shown in brackets.")
+    chosen: set[Zone] = set()
+    for z in ZONE_ORDER:
+        segs = [s for s in analysis.segments if s.zone is z]
+        if not segs:
+            continue
+        tokens = sum(s.tokens_est for s in segs)
+        sample = _preview(segs[0]).plain
+        if z in NEVER_KEEP:
+            console.print(
+                f"  [{ZONE_STYLE[z]}]{z.value:13}[/] {len(segs):3} seg · ~{tokens:5} tok · "
+                "never kept, reported instead"
+            )
+            continue
+        default = "Y/n" if z in selected else "y/N"
+        console.print(
+            f"  [{ZONE_STYLE[z]}]{z.value:13}[/] {len(segs):3} seg · ~{tokens:5} tok · "
+            f"e.g. {sample[:70]}"
+        )
+        answer = console.input(f"    keep {z.value}? [{default}] ").strip().lower()
+        keep = (z in selected) if not answer else answer.startswith("y")
+        if keep:
+            chosen.add(z)
+    return chosen
 
 
 def _segment_table(a: Analysis) -> Table:

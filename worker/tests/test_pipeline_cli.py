@@ -12,7 +12,7 @@ def test_analyze_offline_on_pdf(assignment_pdf: Path):
     assert a.taxonomy_v == "1" and a.pages == 2
     assert abs(sum(a.zone_shares.values()) - 1.0) < 0.01
     kinds = {f.detector for f in a.findings}
-    assert kinds == {"D1", "P1"}
+    assert kinds == {"D1", "P1", "H1", "H2"}  # white 1pt line: colour + size detectors
     policy = next(s for s in a.segments if s.zone is Zone.ai_policy)
     assert policy.heading_path[-1] == "Policies"
     assert any("heuristic-only" in w for w in a.warnings)
@@ -69,7 +69,7 @@ def test_cli_scan_terminal(assignment_pdf: Path, capsys):
     code = main(["scan", str(assignment_pdf), "--no-llm", "--full-text"])
     out = capsys.readouterr().out
     assert code == 0
-    assert "lectern scan" in out and "Zone map" in out and "Findings (2)" in out
+    assert "lectern scan" in out and "Zone map" in out and "Findings (4)" in out
     assert "IGNORE PREVIOUS INSTRUCTIONS" in out  # --full-text prints segment bodies
 
 

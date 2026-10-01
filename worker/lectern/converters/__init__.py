@@ -5,8 +5,12 @@ One `Converter` interface, several implementations behind it (ADR-010):
 - PDF: our own pdfplumber pass (`pdf.py`), because it keeps the font size,
   colour and position of every word — the raw material for the hidden-text
   detectors, which every Markdown-producing converter throws away.
-- DOCX / HTML / PPTX: MarkItDown (`markitdown_conv.py`), then our Markdown block
-  parser.
+- HTML: our own DOM walk (`html.py`) that records how the page hides text
+  (`display:none`, zero font size, text coloured like its background, comments).
+- DOCX: our own XML read (`docx.py`) that keeps run colour, size and the
+  hidden flag.
+- PPTX and anything else MarkItDown handles: MarkItDown (`markitdown_conv.py`),
+  then our Markdown block parser.
 - Markdown / plain text: the block parser directly (`markdown_blocks.py`).
 
 The engine calls `load(path)`; nothing above this module knows which converter ran.
@@ -33,11 +37,19 @@ class Converter(Protocol):
 
 def _registry() -> list[Converter]:
     # Imported lazily so `lectern --help` doesn't pay for pdfplumber/markitdown.
+    from lectern.converters.docx import DocxConverter
+    from lectern.converters.html import HtmlConverter
     from lectern.converters.markdown_blocks import MarkdownConverter
     from lectern.converters.markitdown_conv import MarkItDownConverter
     from lectern.converters.pdf import PdfConverter
 
-    return [PdfConverter(), MarkdownConverter(), MarkItDownConverter()]
+    return [
+        PdfConverter(),
+        HtmlConverter(),
+        DocxConverter(),
+        MarkdownConverter(),
+        MarkItDownConverter(),
+    ]
 
 
 def supported_formats() -> set[str]:

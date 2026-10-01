@@ -1,0 +1,10 @@
+[
+  {"match": "We examine 1,200 preprints", "zone": "background"},
+  {"match": "Peer review increasingly involves language models", "zone": "background"},
+  {"match": "We extracted text from each PDF with two tools", "zone": "background"},
+  {"match": "Of 1,200 manuscripts, 17 contained", "zone": "background"},
+  {"match": "| Template | Count |", "zone": "example"},
+  {"match": "Detection is cheap once one looks", "zone": "background"},
+  {"match": "We thank the anonymous reviewers", "zone": "structure"},
+  {"match": "Doe, J. (2025)", "zone": "structure"}
+]

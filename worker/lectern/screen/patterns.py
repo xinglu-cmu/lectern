@@ -16,8 +16,26 @@ from __future__ import annotations
 import re
 
 from lectern.models import Document, Finding, Segment, Severity
+from lectern.screen.encoding import BIDI, ZERO_WIDTH, is_pua, is_tag
 
 _SENTENCES = re.compile(r"(?<=[.!?])\s+|\n+")
+
+
+def visible_text(text: str) -> tuple[str, list[int]]:
+    """Text without invisible characters, plus a map from each kept index to the original.
+
+    Patterns match on this view, so "ign\u200bore prev\u200bious instructions" is still caught;
+    spans are mapped back to offsets in the segment text."""
+    out: list[str] = []
+    index: list[int] = []
+    for i, ch in enumerate(text):
+        if ch in ZERO_WIDTH or ch in BIDI or is_tag(ch) or is_pua(ch):
+            continue
+        out.append(ch)
+        index.append(i)
+    index.append(len(text))
+    return "".join(out), index
+
 
 DIRECTIVE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(p, re.I)
@@ -88,7 +106,8 @@ class DirectivePatterns:
     def run(self, doc: Document, segments: list[Segment]) -> list[Finding]:
         findings: list[Finding] = []
         for seg in segments:
-            for start, sentence in _sentences(seg.text):
+            text, index = visible_text(seg.text)
+            for start, sentence in _sentences(text):
                 for pat in DIRECTIVE_PATTERNS:
                     m = pat.search(sentence)
                     if m:
@@ -100,7 +119,10 @@ class DirectivePatterns:
                                 segment_id=seg.id,
                                 page=seg.anchor.page_start,
                                 excerpt=_excerpt(sentence),
-                                span={"start": start + m.start(), "end": start + m.end()},
+                                span={
+                                    "start": index[start + m.start()],
+                                    "end": index[min(len(index) - 1, start + m.end())],
+                                },
                                 note=f"matches directive pattern {pat.pattern[:40]!r}",
                             )
                         )
@@ -114,7 +136,8 @@ class PolicyPatterns:
     def run(self, doc: Document, segments: list[Segment]) -> list[Finding]:
         findings: list[Finding] = []
         for seg in segments:
-            for start, sentence in _sentences(seg.text):
+            text, index = visible_text(seg.text)
+            for start, sentence in _sentences(text):
                 ai = AI_TERMS.search(sentence)
                 if ai and POLICY_TERMS.search(sentence):
                     findings.append(
@@ -125,7 +148,10 @@ class PolicyPatterns:
                             segment_id=seg.id,
                             page=seg.anchor.page_start,
                             excerpt=_excerpt(sentence),
-                            span={"start": start, "end": start + len(sentence)},
+                            span={
+                                "start": index[start],
+                                "end": index[min(len(index) - 1, start + len(sentence))],
+                            },
                             note="statement about the use of AI tools",
                         )
                     )

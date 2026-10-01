@@ -1,0 +1,8 @@
+[
+  {"match": "The university's student portal was built in 2014", "zone": "background"},
+  {"match": "The vendor shall deliver", "zone": "task"},
+  {"match": "Vendors must submit proposals", "zone": "task"},
+  {"match": "Proposals will be scored", "zone": "task"},
+  {"match": "| Discovery | 4 |", "zone": "example"},
+  {"match": "This request does not commit", "zone": "structure"}
+]

@@ -30,8 +30,9 @@ TASK_HEADINGS = re.compile(
 )
 BACKGROUND_HEADINGS = re.compile(
     r"\b(introduction|background|overview|motivation|context|related work|summary|"
-    r"abstract|description|learning (objectives|outcomes|goals)|objectives|goals|"
-    r"about|why|history|concepts?|theory|notes?|recap|review|discussion|conclusions?)\b",
+    r"abstract|description|learning (objectives|outcomes|goals)|objectives|goals|purpose|"
+    r"glossary|definitions?|terminology|schedule|about|why|history|concepts?|theory|notes?|"
+    r"recap|review|discussion|conclusions?|results?|methods?|evaluation|experiments?)\b",
     re.I,
 )
 EXAMPLE_HEADINGS = re.compile(
@@ -41,7 +42,9 @@ EXAMPLE_HEADINGS = re.compile(
 )
 STRUCTURE_HEADINGS = re.compile(
     r"\b(table of contents|contents|references|bibliography|acknowledge?ments|index|"
-    r"revision history|version history|change ?log|colophon|legal notice|copyright)\b",
+    r"revision history|version history|change ?log|colophon|legal notice|copyright|"
+    r"terms( and conditions)?|legal|disclaimer|contact( us| information)?|"
+    r"related (posts|articles))\b",
     re.I,
 )
 
@@ -79,7 +82,9 @@ EXAMPLE_MARKERS = re.compile(
 LEGAL_BOILERPLATE = re.compile(
     r"(all rights reserved|©|\(c\) \d{4}|copyright|confidential|terms of (use|service)|"
     r"privacy policy|cookies?|unsubscribe|click here|skip to (main )?content|sign in|log in|"
-    r"follow us|share this|related articles|advertisement|powered by)",
+    r"follow us|share this|related articles|advertisement|powered by|reserves? the right|"
+    r"public records?|does not (commit|constitute|obligate)|no obligation|without (notice|"
+    r"liability)|warrant(y|ies)|indemnif|liabilit(y|ies)|office hours|e-?mail:|phone:)",
     re.I,
 )
 TOC_LINE = re.compile(r"(\.{3,}|…)\s*\d{1,4}\s*$|^\s*\d+(\.\d+)*\s+\S.*\s\d{1,4}\s*$", re.M)
@@ -107,8 +112,14 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
     signals: list[str] = []
     text = seg.text
     body = re.sub(r"^#+ .*$", "", text, flags=re.M).strip()  # text without its headings
-    heading = " ".join(seg.heading_path[-2:])
+    heading = seg.heading_path[-1] if seg.heading_path else ""
     flags = set(seg.flags)
+
+    # 0. hidden text: proved by a detector, never argued with
+    hidden_flags = [f for f in seg.flags if f.startswith("hidden:")]
+    if hidden_flags:
+        signals += [f"flag:{f}" for f in hidden_flags]
+        return Zone.hidden, 0.95, signals
 
     # 1. page furniture: headers, footers, page numbers
     furniture = flags & FURNITURE_FLAGS
@@ -130,7 +141,13 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
         if share >= 0.3 or seg.tokens_est <= 60:
             return Zone.ai_directive, 0.8, signals
 
-    # 3. code, tables, examples
+    # 3. sections whose heading says "boilerplate" (before the code/table rules: a
+    #    revision-history table is structure, not an example)
+    if STRUCTURE_HEADINGS.search(heading):
+        signals.append("heading:structure")
+        return Zone.structure, 0.75, signals
+
+    # 4. code, tables, examples
     if "code_heavy" in flags:
         signals.append("flag:code_heavy")
         return Zone.example, 0.9, signals
@@ -154,14 +171,11 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
     if toc_lines >= 3 or re.search(r"\btable of contents\b", heading + " " + text[:80], re.I):
         signals.append(f"toc_lines={toc_lines}")
         return Zone.structure, 0.85, signals
-    if STRUCTURE_HEADINGS.search(heading):
-        signals.append("heading:structure")
-        return Zone.structure, 0.75, signals
     lines = [ln for ln in body.splitlines() if ln.strip()]
     short_lines = sum(1 for ln in lines if len(ln.split()) <= 4)
     urls = len(URL.findall(body))
     legal = len(LEGAL_BOILERPLATE.findall(body))
-    if legal and seg.tokens_est <= 80:
+    if legal and (seg.tokens_est <= 80 or (legal >= 2 and seg.tokens_est <= 160)):
         signals.append(f"boilerplate={legal}")
         return Zone.structure, 0.8, signals
     if urls >= 2 and seg.tokens_est <= 60 and len(lines) <= 3:
@@ -192,6 +206,10 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
     if bg_heading:
         signals.append("heading:background")
 
+    if bg_heading and not task_heading and task_density < 1.0:
+        # an overview, introduction or glossary stays background unless it is nothing but
+        # instructions ("you will implement …" in an overview is still context)
+        return Zone.background, 0.7 if task_density < 0.25 else 0.65, signals
     if task_density >= 0.6 and task_hits >= 2:
         return Zone.task, min(0.9, 0.7 + 0.1 * task_density), signals
     if task_heading and task_hits >= 1:

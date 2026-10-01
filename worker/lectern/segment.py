@@ -50,7 +50,9 @@ def render_block(block: Block) -> str:
 def segment(doc: Document) -> list[Segment]:
     builder = _Builder()
     for block in doc.blocks:
-        if set(block.flags) & FURNITURE_FLAGS:
+        if block.hidden:
+            builder.add_hidden(block)
+        elif set(block.flags) & FURNITURE_FLAGS:
             builder.add_furniture(block)
         elif block.type is BlockType.heading:
             builder.add_heading(block)
@@ -66,14 +68,25 @@ class _Builder:
         self.current_path: list[str] = []
         self.stack: list[tuple[int, str]] = []  # (level, heading text)
         self.furniture: list[Block] = []
+        self.hidden: list[Block] = []
 
     # -- input ----------------------------------------------------------------
 
     def add_furniture(self, block: Block) -> None:
+        self._flush_hidden()
         self.furniture.append(block)
+
+    def add_hidden(self, block: Block) -> None:
+        """Every hidden block is its own segment: one finding, one quarantined unit, and the
+        visible text around it stays contiguous."""
+        self._flush_furniture()
+        self._flush()
+        self._flush_hidden()
+        self.hidden.append(block)
 
     def add_heading(self, block: Block) -> None:
         self._flush_furniture()
+        self._flush_hidden()
         if any(b.type is not BlockType.heading for b in self.current):
             self._flush()
         level = block.level or 1
@@ -86,6 +99,7 @@ class _Builder:
 
     def add_content(self, block: Block) -> None:
         self._flush_furniture()
+        self._flush_hidden()
         pieces = self._split_if_huge(block)
         for piece in pieces:
             have = sum(est_tokens(render_block(b)) for b in self.current)
@@ -99,6 +113,7 @@ class _Builder:
     def finish(self) -> list[Segment]:
         self._flush()
         self._flush_furniture()
+        self._flush_hidden()
         self._merge_small_tails()
         self.done.sort(key=lambda s: s.anchor.block_start)
         for i, seg in enumerate(self.done, start=1):
@@ -117,6 +132,11 @@ class _Builder:
         if self.furniture:
             self.done.append(self._make(self.furniture, [t for _, t in self.stack]))
             self.furniture = []
+
+    def _flush_hidden(self) -> None:
+        if self.hidden:
+            self.done.append(self._make(self.hidden, [t for _, t in self.stack]))
+            self.hidden = []
 
     def _make(self, blocks: list[Block], path: list[str]) -> Segment:
         text = "\n\n".join(render_block(b) for b in blocks)
@@ -176,6 +196,7 @@ class _Builder:
                 and seg.tokens_est < MIN_TOKENS // 2
                 and seg.heading_path == prev.heading_path
                 and not (set(seg.flags) | set(prev.flags)) & FURNITURE_FLAGS
+                and not any(f.startswith("hidden:") for f in seg.flags + prev.flags)
                 and "heading_only" not in prev.flags
                 and prev.tokens_est + seg.tokens_est <= MAX_TOKENS * 1.25
                 and seg.anchor.block_start == prev.anchor.block_end + 1

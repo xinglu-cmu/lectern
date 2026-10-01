@@ -33,6 +33,10 @@ jobs:
           lectern --version
           lectern scan README.md --no-llm --json > /tmp/scan.json
           python -c "import json; a=json.load(open('/tmp/scan.json')); assert a['segments'], a"
+      - name: red-team suite (every PR; gates recall ≥ 0.90, precision ≥ 0.80 per technique)
+        run: python eval/redteam/run.py --check
+      - name: zoning accuracy (labeled set v0; reported, gated from week 6)
+        run: python eval/zoning/run.py
 
   web:
     runs-on: ubuntu-latest
@@ -48,6 +52,6 @@ jobs:
       - run: npm run build
         working-directory: web
 
-  # week 6 (DESIGN §9): red-team suite (every PR, deterministic), zoning
-  # smoke (8 docs) and conversion snapshots join here; the full zoning set
-  # runs weekly via the Batches API.
+  # week 6 (DESIGN §9): conversion snapshots join the worker job and the
+  # zoning gate (macro-F1 ≥ 0.75) switches on; the full zoning set runs
+  # weekly via the Batches API.
