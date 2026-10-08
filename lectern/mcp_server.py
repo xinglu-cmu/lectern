@@ -17,6 +17,7 @@ Setup (Claude Desktop): add to claude_desktop_config.json
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -100,34 +101,53 @@ def scan_summary(analysis: Analysis) -> dict[str, Any]:
 
 
 class LecternTools:
-    """The three tools, as plain callables (testable without an MCP transport)."""
+    """The three tools, as plain callables (testable without an MCP transport).
 
-    def __init__(self, use_llm: bool = True) -> None:
+    An agent typically calls scan, then clean or brief, on the same file; the analysis is
+    cached by content hash so the engine (and any model) runs once per file version."""
+
+    def __init__(
+        self, use_llm: bool = True, local: bool | str = False, cache_size: int = 32
+    ) -> None:
         self.use_llm = use_llm
+        self.local = local
+        self.cache_size = cache_size
+        self._cache: dict[str, tuple[Analysis, Any]] = {}
 
     def _llm(self):
-        return make_llm() if self.use_llm else None
+        return make_llm(local=self.local) if self.use_llm else None
+
+    def _analysis(self, path: str) -> tuple[Analysis, Any]:
+        p = _resolve(path)
+        key = hashlib.sha256(p.read_bytes()).hexdigest() + f":{self.use_llm}:{self.local}"
+        hit = self._cache.get(key)
+        if hit is not None:
+            return hit
+        llm = self._llm()
+        analysis = analyze(p, use_llm=llm is not None, llm=llm)
+        if len(self._cache) >= self.cache_size:
+            self._cache.pop(next(iter(self._cache)))
+        self._cache[key] = (analysis, llm)
+        return analysis, llm
 
     def scan_document(self, path: str) -> dict[str, Any]:
-        llm = self._llm()
-        return scan_summary(analyze(_resolve(path), use_llm=llm is not None, llm=llm))
+        analysis, _ = self._analysis(path)
+        return scan_summary(analysis)
 
     def clean_document(self, path: str, keep: list[str] | None = None, report: bool = True) -> str:
-        llm = self._llm()
-        analysis = analyze(_resolve(path), use_llm=llm is not None, llm=llm)
+        analysis, _ = self._analysis(path)
         return clean_markdown(analysis, _zones(keep), report=report)
 
     def brief_document(self, path: str, keep: list[str] | None = None) -> str:
-        llm = self._llm()
-        analysis = analyze(_resolve(path), use_llm=llm is not None, llm=llm)
+        analysis, llm = self._analysis(path)
         out = write_brief(analysis, llm if analysis.mode == "llm" else None)
         return render_brief(analysis, out, _zones(keep))
 
 
-def build_server(use_llm: bool = True):
+def build_server(use_llm: bool = True, local: bool | str = False):
     from mcp.server.mcpserver import MCPServer
 
-    tools = LecternTools(use_llm=use_llm)
+    tools = LecternTools(use_llm=use_llm, local=local)
     server = MCPServer(
         name="lectern",
         title="Lectern",

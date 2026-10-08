@@ -37,6 +37,7 @@ from pydantic import BaseModel, Field
 from lectern.brief import render_brief, write_brief
 from lectern.converters import supported_formats
 from lectern.emit import NEVER_KEEP, clean_markdown
+from lectern.llm import DEFAULT_MODEL
 from lectern.models import Analysis, FindingStatus, Zone
 from lectern.pipeline import analyze, make_llm
 from lectern.serve.store import Store
@@ -70,7 +71,11 @@ def _is_local(value: str | None) -> bool:
 
 
 def create_app(
-    store: Store | None = None, *, use_llm: bool = True, model: str | None = None
+    store: Store | None = None,
+    *,
+    use_llm: bool = True,
+    model: str | None = None,
+    local: bool | str = False,
 ) -> FastAPI:
     store = store or Store()
     pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="lectern-analyze")
@@ -109,7 +114,7 @@ def create_app(
     def _run(aid: str, path: Path) -> None:
         store.set_status(aid, "running")
         try:
-            llm = make_llm(model) if use_llm and model else (make_llm() if use_llm else None)
+            llm = make_llm(model or DEFAULT_MODEL, local=local) if use_llm else None
             analysis = analyze(path, use_llm=llm is not None, llm=llm)
             store.set_result(aid, json.loads(analysis.model_dump_json()), analysis.mode)
         except Exception as exc:  # the file broke a converter: keep the row, say why
@@ -216,7 +221,7 @@ def create_app(
             text = clean_markdown(analysis, keep, report=body.report)
             media = "text/markdown"
         elif body.kind == "brief":
-            llm = make_llm() if use_llm and analysis.mode == "llm" else None
+            llm = make_llm(local=local) if use_llm and analysis.mode == "llm" else None
             text = render_brief(analysis, write_brief(analysis, llm), keep)
             media = "text/markdown"
         else:
@@ -262,14 +267,19 @@ def apply_review(analysis: Analysis, review: dict[str, Any]) -> Analysis:
 
 
 def main(
-    port: int = 8765, *, open_browser: bool = True, use_llm: bool = True, model: str | None = None
+    port: int = 8765,
+    *,
+    open_browser: bool = True,
+    use_llm: bool = True,
+    model: str | None = None,
+    local: bool | str = False,
 ) -> None:
     import threading
     import webbrowser
 
     import uvicorn
 
-    app = create_app(use_llm=use_llm, model=model)
+    app = create_app(use_llm=use_llm, model=model, local=local)
     url = f"http://127.0.0.1:{port}/"
     if open_browser:
         threading.Timer(0.8, lambda: webbrowser.open(url)).start()

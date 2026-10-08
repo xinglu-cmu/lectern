@@ -115,6 +115,27 @@ def test_tools_offline(assignment_pdf: Path):
         tools.scan_document("/nowhere/x.pdf")
 
 
+def test_tools_cache_by_content(assignment_pdf: Path, monkeypatch):
+    import lectern.mcp_server as m
+
+    calls = []
+    real = m.analyze
+
+    def counting(path, **kw):
+        calls.append(path)
+        return real(path, **kw)
+
+    monkeypatch.setattr(m, "analyze", counting)
+    tools = LecternTools(use_llm=False)
+    tools.scan_document(str(assignment_pdf))
+    tools.clean_document(str(assignment_pdf))
+    tools.brief_document(str(assignment_pdf))
+    assert len(calls) == 1  # one engine run for scan → clean → brief on the same file
+    assignment_pdf.write_bytes(assignment_pdf.read_bytes() + b"\n%changed")
+    tools.scan_document(str(assignment_pdf))
+    assert len(calls) == 2  # a changed file is analyzed again
+
+
 def test_hidden_zone_cannot_be_kept_through_mcp(assignment_pdf: Path):
     tools = LecternTools(use_llm=False)
     md = tools.clean_document(
