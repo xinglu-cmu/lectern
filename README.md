@@ -19,7 +19,15 @@ lectern scan  vendor.pdf --fail-on critical          # exit 3 on a hidden direct
 - **You choose** — keep/drop by zone (CLI flags, `--interactive`, or the local review UI), then export clean Markdown with a report of what was removed and why.
 - **Local by design** — no accounts, no server, no telemetry. Conversion, zoning, all detectors and clean output run offline; an Anthropic key (or, next, a local model) upgrades zoning and adds the overview.
 
-Two more front doors on the same engine are in progress ([ADR-012](docs/adr/ADR-012-local-first.md)): **`lectern serve`**, a review UI on localhost, and **`lectern mcp`**, so Claude Desktop, Claude Code and other agents can screen a document before reading it.
+Three front doors on one engine, all local ([ADR-012](docs/adr/ADR-012-local-first.md)):
+
+```bash
+lectern brief assignment.pdf                         # one page: what it is, what it asks, what was found
+lectern mcp                                          # the engine as tools for AI agents (stdio)
+lectern serve                                        # review UI on localhost (in progress)
+```
+
+**For agents.** Add Lectern to Claude Code with `claude mcp add lectern -- lectern mcp`, or to Claude Desktop with `{"mcpServers": {"lectern": {"command": "lectern", "args": ["mcp"]}}}`. The agent gets three tools — `scan_document`, `clean_document`, `brief_document` — and an instruction to call `scan_document` on any file before reading it. Hidden text is quarantined inside Lectern and only *described* to the agent; it never enters the agent's context. Install with `pip install "lectern-cli[mcp]"`.
 
 **Status:** phase 1 done (CLI, detectors, evals; PRs #49, #50). Phase 2 — the local-first cut, MCP server and local UI — in progress. The [design doc](docs/DESIGN.md) (v3) and [ADRs](docs/adr/) explain every decision, including the two pivots.
 

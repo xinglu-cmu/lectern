@@ -3,6 +3,8 @@
     lectern scan  DOC [--json] [--no-llm] [--full-text] [--fail-on LEVEL] [--model MODEL]
     lectern clean DOC [-o out.md] [--keep Z,Z] [--drop Z,Z] [--interactive]
                       [--no-llm] [--no-report] [--model MODEL]
+    lectern brief DOC [-o brief.md] [--keep Z,Z] [--no-llm] [--model MODEL]
+    lectern mcp                      (stdio MCP server: scan / clean / brief as tools)
 
 Exit codes: 0 done; 1 the file could not be read or analyzed; 2 usage error;
 3 `scan --fail-on LEVEL` found a finding at or above LEVEL (a CI / ingest gate).
@@ -71,6 +73,24 @@ def build_parser() -> argparse.ArgumentParser:
         "--model", default=DEFAULT_MODEL, help=f"Claude model (default {DEFAULT_MODEL})"
     )
     clean.set_defaults(func=cmd_clean)
+
+    brief = sub.add_parser(
+        "brief", help="write a one-page brief: what it is, what it asks, what was found"
+    )
+    brief.add_argument("doc", help="PDF, DOCX, HTML, PPTX, Markdown or text file")
+    brief.add_argument("-o", "--output", help="output file (default: stdout)")
+    brief.add_argument("--keep", help="zones the clean copy would keep (for the last section)")
+    brief.add_argument("--no-llm", action="store_true", help="offline: no model-written half")
+    brief.add_argument(
+        "--model", default=DEFAULT_MODEL, help=f"Claude model (default {DEFAULT_MODEL})"
+    )
+    brief.set_defaults(func=cmd_brief)
+
+    mcp = sub.add_parser(
+        "mcp", help="run the MCP server on stdio (for Claude Code, Claude Desktop, agents)"
+    )
+    mcp.add_argument("--no-llm", action="store_true", help="never call a model from the tools")
+    mcp.set_defaults(func=cmd_mcp)
     return parser
 
 
@@ -107,6 +127,50 @@ def cmd_scan(args: argparse.Namespace) -> int:
     if args.fail_on and fails_threshold(analysis, Severity(args.fail_on)):
         Console(stderr=True).print(f"[red]findings at or above '{args.fail_on}': exit 3[/]")
         return 3
+    return 0
+
+
+def cmd_brief(args: argparse.Namespace) -> int:
+    from lectern.brief import render_brief, write_brief
+    from lectern.emit import resolve_selection
+    from lectern.pipeline import analyze, make_llm
+
+    err = Console(stderr=True)
+
+    def usage(msg: str) -> None:
+        err.print(f"[red]error:[/] {msg}")
+        raise SystemExit(2)
+
+    keep = resolve_selection(_parse_zones(args.keep, usage), None)
+    llm = None if args.no_llm else make_llm(args.model)
+    try:
+        analysis = analyze(args.doc, use_llm=not args.no_llm, llm=llm, model=args.model)
+    except FileNotFoundError:
+        err.print(f"[red]error:[/] file not found: {args.doc}")
+        return 1
+    except UnsupportedFormat as exc:
+        err.print(f"[red]error:[/] {exc}")
+        return 1
+    out = write_brief(analysis, llm if analysis.mode == "llm" else None)
+    text = render_brief(analysis, out, keep)
+    if args.output:
+        with open(args.output, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        err.print(f"[green]wrote[/] {args.output}")
+    else:
+        sys.stdout.write(text)
+    return 0
+
+
+def cmd_mcp(args: argparse.Namespace) -> int:
+    try:
+        from lectern.mcp_server import build_server
+    except ImportError:
+        Console(stderr=True).print(
+            "[red]error:[/] the MCP server needs the `mcp` package: pip install 'lectern-cli[mcp]'"
+        )
+        return 1
+    build_server(use_llm=not args.no_llm).run(transport="stdio")
     return 0
 
 

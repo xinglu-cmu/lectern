@@ -66,9 +66,8 @@ def analyze(
     overview: Overview | None = None
     mode = "heuristic-only"
     if use_llm and llm is None:
-        if credentials_present():
-            llm = AnthropicLLM(model)
-        else:
+        llm = make_llm(model)
+        if llm is None:
             warnings.append(
                 "no ANTHROPIC_API_KEY found: zoning is heuristic-only and there is no overview "
                 "(same as --no-llm)"
@@ -110,6 +109,11 @@ def analyze(
         llm=llm.usage if llm is not None else None,
         warnings=warnings,
     )
+
+
+def make_llm(model: str = DEFAULT_MODEL) -> LLM | None:
+    """The model client for this run, or None when no credentials are present."""
+    return AnthropicLLM(model) if credentials_present() else None
 
 
 def _attach_segments(findings: list[Finding], segments: list[Segment]) -> None:
