@@ -37,6 +37,13 @@ Meanwhile the CLI is feature-complete for v1 three weeks in (PR #50): scan, clea
 - The web review UI from DESIGN v2 §7 (toggles, per-segment overrides, reorder, preview, findings review, policy acknowledgment) survives in full, served from localhost.
 - Java leaves the project. A Java component kept only for its résumé value would be busywork; Lectern's backend language is the engine's language.
 
+## What "cloud" can still mean
+
+Two shapes fit the premise, and both are in the plan (DESIGN v3 §11). What never fits is a Lectern-run service that holds other people's documents.
+
+- **Organizations: a self-hosted Gateway (phase 4, optional module, Java / Spring Boot).** A company that wants every document entering its internal AI pipelines screened first runs a policy enforcement point on its own infrastructure: a REST service that accepts a document, calls the Python engine as a sidecar, applies a policy (the `--fail-on` threshold), writes an audit record (who, which file, which findings, which decision) and returns the clean copy or a refusal. The documents stay in the organization's network. Java is the right tool there because that is what organizations run and integrate with; Spring Boot, Postgres (audit log, idempotent job table), Docker Compose, Testcontainers and OpenTelemetry each have a reason in that setting. *Why Java* has an answer; it is not kept for its own sake.
+- **Individuals: connectors to their own storage (phase 4).** `lectern serve` can export the brief, the clean copy and the report to places the user already works in — Google Docs / Drive first — through the user's own account (OAuth from the local app). Data goes where the user chose, not to us; without configuration, nothing is ever sent.
+
 ## Revisit when
 
-A team (not an individual) wants shared review with roles and an audit trail — a hosted or self-hosted multi-user mode would then be a separate product decision, built on the same engine, after v1.
+A team wants shared review with roles across organizations, or a user asks for Lectern to host anything on their behalf — both would be a separate product decision, built on the same engine, after v1.

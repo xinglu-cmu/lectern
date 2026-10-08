@@ -44,12 +44,12 @@ Goals: a genuinely useful daily tool with organic GitHub/PyPI adoption; an agent
 
 ### Non-goals (v1)
 
-- A hosted service, accounts, teams, cloud storage, telemetry of any kind. Nothing leaves the machine ([ADR-012](adr/ADR-012-local-first.md)).
+- A Lectern-run hosted service, accounts, telemetry of any kind. Nothing leaves the machine unless the user sends it somewhere of their own (connectors) or an organization runs the Gateway on its own infrastructure ([ADR-012](adr/ADR-012-local-first.md)).
 - Chat/Q&A over documents, retrieval, embeddings. ("Work with the cleaned doc" remains a plausible phase 2.)
 - Perfect PDF fidelity — conversion rides on established converters plus our own passes (§4); we own the layer above.
 - Claiming injection-proofness: we claim detection + quarantine + disclosure with measured recall, never immunity.
 - Editing/rewriting document *content*: v1 selects and restructures; the brief summarizes but never replaces the source. Rewriting reintroduces the trust problem we exist to solve.
-- Real-time collaboration, mobile apps, a Java backend kept for its own sake.
+- Real-time collaboration, mobile apps. A Java component only where Java is the right tool (the organizational Gateway), never for its own sake.
 
 ## 3. Users and stories
 
@@ -150,7 +150,7 @@ The dated schedule is dropped; phases ship when done, as fast as they can be bui
 | 1 ✅ | Scaffold, engine, `scan`, detectors H1–H6, `clean`, `--fail-on`, red-team + zoning evals (PRs #49, #50) | Full CLI on an attacked document; numbers in the README |
 | 2 | **Local-first cut** ([ADR-012](adr/ADR-012-local-first.md)): remove the hosted scaffolds, package at repo root; `lectern brief`; `lectern mcp` with the three tools and setup docs; `lectern serve` with report view, selection view, findings review, exports, SQLite history | S4 and S6 demoable; a Claude Code session screens a PDF through MCP |
 | 3 | Local model path (`--local`), distillation + ablation; labeled set to 30 and the zoning gate on; conversion snapshots | S7 demoable; heuristic / local / Haiku table published |
-| 4 | Polish: onboarding, sample-document gallery, demo GIF; **PyPI v0.1**; MCP listing; labeled set to 60 | Installable with one command; ≥ 10 real users |
+| 4 | Polish: onboarding, sample-document gallery, demo GIF; **PyPI v0.1**; MCP listing; labeled set to 60; **connectors** (export the brief / clean copy to the user's own Google Docs / Drive); **Gateway** (optional module: self-hosted Spring Boot policy enforcement point for organizations — REST + OpenAPI, Python engine as a sidecar, `--fail-on` policy, audit log in Postgres, Testcontainers, OpenTelemetry; [ADR-012](adr/ADR-012-local-first.md) says why Java there) | Installable with one command; ≥ 10 real users; a Gateway demo: a document rejected at the door with an audit record |
 | 5 | Wrap: success measures in the README, launch write-up | Deliverables checklist done |
 
 Buffer: growth to ≥ 20 users; "work with the cleaned doc" mode as a phase-2 product idea; and the point where Lectern meets Keel — a locally trained agent (Keel's SFT/GRPO harness) that uses Lectern's tools to screen documents before acting on them, with Lectern's labeled set and brief as training signal.
