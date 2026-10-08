@@ -65,6 +65,28 @@ def test_fail_on_levels(assignment_pdf: Path, assignment_md: Path):
     assert not fails_threshold(clean, Severity.info)
 
 
+def test_cli_scan_several_files(assignment_pdf: Path, assignment_md: Path, capsys):
+    code = main(
+        [
+            "scan",
+            str(assignment_md),
+            str(assignment_pdf),
+            "--no-llm",
+            "--json",
+            "--fail-on",
+            "critical",
+        ]
+    )
+    assert code == 3  # one of the two has a hidden directive
+    out = json.loads(capsys.readouterr().out)
+    assert isinstance(out, list) and len(out) == 2
+    assert (
+        main(["scan", str(assignment_md), str(assignment_md), "--no-llm", "--fail-on", "critical"])
+        == 0
+    )
+    assert capsys.readouterr().out.count("lectern scan") == 2
+
+
 def test_cli_scan_fail_on_exit_code(assignment_pdf: Path, assignment_md: Path, capsys):
     assert main(["scan", str(assignment_pdf), "--no-llm", "--json", "--fail-on", "critical"]) == 3
     capsys.readouterr()

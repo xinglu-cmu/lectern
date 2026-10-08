@@ -51,8 +51,12 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
 
     scan = sub.add_parser("scan", help="analyze a document and print the report")
-    scan.add_argument("doc", help="PDF, DOCX, HTML, PPTX, Markdown or text file")
-    scan.add_argument("--json", action="store_true", help="print the full analysis as JSON")
+    scan.add_argument("doc", nargs="+", help="PDF, DOCX, HTML, PPTX, Markdown or text file(s)")
+    scan.add_argument(
+        "--json",
+        action="store_true",
+        help="print the full analysis as JSON (a JSON array for several files)",
+    )
     scan.add_argument(
         "--no-llm",
         action="store_true",
@@ -141,20 +145,37 @@ def _analyze_or_exit(args: argparse.Namespace):
 
 
 def cmd_scan(args: argparse.Namespace) -> int:
+    """One report per file. Several files (a pre-commit hook or CI step passes many) print one
+    after another, or one JSON array; exit 3 if any of them reaches `--fail-on`."""
     from lectern.pipeline import fails_threshold
     from lectern.report import render
 
-    analysis = _analyze_or_exit(args)
-    if analysis is None:
-        return 1
+    docs = args.doc if isinstance(args.doc, list) else [args.doc]
+    analyses = []
+    for doc in docs:
+        args.doc = doc
+        analysis = _analyze_or_exit(args)
+        if analysis is None:
+            return 1
+        analyses.append(analysis)
     if args.json:
-        sys.stdout.write(analysis.model_dump_json(indent=2))
+        if len(analyses) == 1:
+            sys.stdout.write(analyses[0].model_dump_json(indent=2))
+        else:
+            sys.stdout.write("[" + ",\n".join(a.model_dump_json(indent=2) for a in analyses) + "]")
         sys.stdout.write("\n")
     else:
-        render(analysis, Console(), full_text=args.full_text)
-    if args.fail_on and fails_threshold(analysis, Severity(args.fail_on)):
-        Console(stderr=True).print(f"[red]findings at or above '{args.fail_on}': exit 3[/]")
-        return 3
+        console = Console()
+        for a in analyses:
+            render(a, console, full_text=args.full_text)
+    if args.fail_on:
+        failing = [a for a in analyses if fails_threshold(a, Severity(args.fail_on))]
+        if failing:
+            names = ", ".join(a.source.rsplit("/", 1)[-1] for a in failing)
+            Console(stderr=True).print(
+                f"[red]findings at or above '{args.fail_on}' in {names}: exit 3[/]"
+            )
+            return 3
     return 0
 
 
