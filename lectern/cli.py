@@ -5,6 +5,7 @@
                       [--no-llm] [--no-report] [--model MODEL]
     lectern brief DOC [-o brief.md] [--keep Z,Z] [--no-llm] [--model MODEL]
     lectern mcp                      (stdio MCP server: scan / clean / brief as tools)
+    lectern serve [--port 8765] [--no-browser] [--no-llm]   (review UI on 127.0.0.1)
 
 Exit codes: 0 done; 1 the file could not be read or analyzed; 2 usage error;
 3 `scan --fail-on LEVEL` found a finding at or above LEVEL (a CI / ingest gate).
@@ -91,6 +92,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     mcp.add_argument("--no-llm", action="store_true", help="never call a model from the tools")
     mcp.set_defaults(func=cmd_mcp)
+
+    serve = sub.add_parser(
+        "serve", help="open the local review UI in your browser (127.0.0.1 only)"
+    )
+    serve.add_argument("--port", type=int, default=8765)
+    serve.add_argument("--no-browser", action="store_true", help="don't open the browser")
+    serve.add_argument("--no-llm", action="store_true", help="never call a model")
+    serve.add_argument("--model", default=None, help=f"Claude model (default {DEFAULT_MODEL})")
+    serve.set_defaults(func=cmd_serve)
     return parser
 
 
@@ -171,6 +181,20 @@ def cmd_mcp(args: argparse.Namespace) -> int:
         )
         return 1
     build_server(use_llm=not args.no_llm).run(transport="stdio")
+    return 0
+
+
+def cmd_serve(args: argparse.Namespace) -> int:
+    try:
+        from lectern.serve.app import main as serve_main
+    except ImportError:
+        Console(stderr=True).print(
+            "[red]error:[/] the review UI needs FastAPI: pip install 'lectern-cli[serve]'"
+        )
+        return 1
+    serve_main(
+        args.port, open_browser=not args.no_browser, use_llm=not args.no_llm, model=args.model
+    )
     return 0
 
 
