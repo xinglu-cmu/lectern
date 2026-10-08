@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lectern</title>
+<style>
+:root { --bg:#f3f4f6; --panel:#fff; --ink:#18202f; --muted:#5b6576; --rule:#d7dbe2; --accent:#3150d0; --soft:#e7ebfb;
+  --task:#2c8a57; --background:#2f7fbf; --example:#6a5acd; --structure:#8a93a1; --ai_policy:#b27a0c; --ai_directive:#c0392b; --hidden:#9b1fb2; --unknown:#5b6576;
+  --warn-bg:#fbf0d9; --crit-bg:#fde8e6; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0f131a; --panel:#171c26; --ink:#e4e8ef; --muted:#9aa3b3; --rule:#2b3343; --accent:#95a8ff; --soft:#232b46; --warn-bg:#3a2e14; --crit-bg:#3d1b18; } }
+* { box-sizing:border-box } body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif }
+a { color:var(--accent) } code { font-family: ui-monospace, Menlo, monospace; font-size:.92em }
+.app { display:grid; grid-template-columns: 260px minmax(0,1fr); min-height:100vh }
+@media (max-width: 800px) { .app { grid-template-columns: 1fr } aside { border-right:0; border-bottom:1px solid var(--rule) } }
+aside { border-right:1px solid var(--rule); padding:16px; display:grid; gap:12px; align-content:start; background:var(--panel) }
+aside h1 { font-size:18px; margin:0 } aside .tag { color:var(--muted); font-size:12px }
+.drop { border:2px dashed var(--rule); border-radius:10px; padding:18px 12px; text-align:center; color:var(--muted); cursor:pointer }
+.drop.over { border-color:var(--accent); background:var(--soft) }
+.hist { display:grid; gap:4px; max-height:60vh; overflow:auto }
+.hist button { text-align:left; font:inherit; background:none; border:1px solid transparent; border-radius:8px; padding:6px 8px; color:var(--ink); cursor:pointer; display:grid }
+.hist button:hover, .hist button.sel { border-color:var(--accent); background:var(--soft) }
+.hist .f { font-weight:600; font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap } .hist .s { font-size:12px; color:var(--muted) }
+main { padding:20px 24px; display:grid; gap:18px; align-content:start; max-width:1100px }
+.card { background:var(--panel); border:1px solid var(--rule); border-radius:10px; padding:16px 18px; display:grid; gap:12px }
+.card h2 { margin:0; font-size:17px } .card h3 { margin:0; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted) }
+.muted { color:var(--muted); font-size:13.5px }
+.tabs { display:flex; gap:6px; flex-wrap:wrap } .tabs button { font:inherit; padding:7px 14px; border-radius:999px; border:1px solid var(--rule); background:var(--panel); color:var(--muted); cursor:pointer }
+.tabs button[aria-selected="true"] { background:var(--ink); color:var(--bg); border-color:var(--ink) }
+.bar { display:flex; height:14px; border-radius:7px; overflow:hidden; border:1px solid var(--rule) } .bar i { display:block; height:100% }
+.legend { display:flex; flex-wrap:wrap; gap:6px 14px; font-size:13px } .sw { display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-1px; margin-right:5px }
+.zone { font:600 11px ui-monospace,Menlo,monospace; padding:1px 7px; border-radius:999px; color:#fff; display:inline-block }
+table { border-collapse:collapse; width:100%; font-size:13.5px } th, td { text-align:left; padding:6px 8px; border-top:1px solid var(--rule); vertical-align:top } th { color:var(--muted); font-weight:600; font-size:12px; border-top:0 }
+.banner { border-radius:8px; padding:12px 14px; display:grid; gap:8px } .banner.warn { background:var(--warn-bg) } .banner.crit { background:var(--crit-bg) }
+.banner label { display:flex; gap:8px; align-items:center; font-weight:600 }
+.toggles { display:flex; flex-wrap:wrap; gap:8px } .toggles label { display:inline-flex; gap:6px; align-items:center; border:1px solid var(--rule); border-radius:999px; padding:4px 10px; cursor:pointer; font-size:13.5px }
+.seg { display:grid; grid-template-columns: 28px 70px 1fr; gap:8px; align-items:start; padding:8px 0; border-top:1px solid var(--rule) }
+.seg .t { font-size:13.5px; white-space:pre-wrap; max-height:5.2em; overflow:hidden } .seg .path { font-size:12px; color:var(--muted) }
+.seg select { font:inherit; font-size:12px } .seg.off .t { opacity:.45 }
+.actions { display:flex; gap:8px; flex-wrap:wrap } .btn { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--rule); background:var(--panel); color:var(--ink); cursor:pointer } .btn.primary { background:var(--accent); color:#fff; border-color:var(--accent) } .btn[disabled] { opacity:.5; cursor:not-allowed }
+pre.preview { background:var(--bg); border:1px solid var(--rule); border-radius:8px; padding:12px; max-height:50vh; overflow:auto; font-size:12.5px; white-space:pre-wrap }
+.status { font-size:13px; color:var(--muted) } .err { color:var(--ai_directive) }
+.small { font-size:12px; color:var(--muted) }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div><h1>Lectern</h1><div class="tag">Know what your AI is reading. Local only.</div></div>
+    <div class="drop" id="drop" tabindex="0">Drop a PDF, DOCX, HTML, PPTX, Markdown or text file here, or click to choose.
+      <input type="file" id="file" hidden></div>
+    <div class="status" id="uploadStatus"></div>
+    <div><h3 style="margin:0 0 6px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">History</h3><div class="hist" id="hist"></div></div>
+    <div class="small">Everything stays in <code>~/.lectern</code>. Delete removes the file too.</div>
+  </aside>
+  <main id="main">
+    <div class="card"><h2>Drop a document to begin</h2><p class="muted">Lectern reads it on this machine, finds hidden and AI-directed text, labels every part by what it is, and lets you choose what a clean copy keeps.</p></div>
+  </main>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>
