@@ -9,7 +9,7 @@ zoned `hidden` are left out — they never reach a prompt. Skipped entirely in
 from __future__ import annotations
 
 from lectern.llm import LLM, TRUST_BOUNDARY
-from lectern.models import Document, Overview, Segment, Zone
+from lectern.models import Analysis, Document, Overview, Segment, Zone
 
 OUTLINE_BUDGET_TOKENS = 8000
 PER_SEGMENT_CHARS = 320
@@ -30,10 +30,22 @@ def summarize(doc: Document, segments: list[Segment], llm: LLM) -> Overview | No
 
 
 def render_outline(doc: Document, segments: list[Segment]) -> str:
+    return _outline(doc.source, doc.format, doc.pages, doc.title, segments)
+
+
+def render_outline_from_analysis(analysis: Analysis) -> str:
+    return _outline(
+        analysis.source, analysis.format, analysis.pages, analysis.title, analysis.segments
+    )
+
+
+def _outline(
+    source: str, fmt: str, pages: int | None, title: str | None, segments: list[Segment]
+) -> str:
     lines = [
-        f"Filename: {doc.source.rsplit('/', 1)[-1]}",
-        f"Format: {doc.format}" + (f", {doc.pages} pages" if doc.pages else ""),
-        f"Title: {doc.title}" if doc.title else "Title: (none)",
+        f"Filename: {source.rsplit('/', 1)[-1]}",
+        f"Format: {fmt}" + (f", {pages} pages" if pages else ""),
+        f"Title: {title}" if title else "Title: (none)",
         "",
         "<document>",
     ]
