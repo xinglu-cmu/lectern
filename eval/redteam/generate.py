@@ -174,7 +174,12 @@ def render_pdf(path: Path, title: str, sections: list[Section], attack: dict | N
             elif t in ("H6_tags", "H6_zerowidth", "D1_visible"):
                 put(attack["text"])
     newpage()
-    write_pdf(path, pages, title=title, subject=attack["payload"] if attack and attack["technique"] == "H5_metadata" else None)
+    write_pdf(
+        path,
+        pages,
+        title=title,
+        subject=attack["payload"] if attack and attack["technique"] == "H5_metadata" else None,
+    )
 
 
 def render_html(path: Path, title: str, sections: list[Section], attack: dict | None) -> None:
@@ -234,7 +239,9 @@ RENDER = {"pdf": render_pdf, "html": render_html, "docx": render_docx}
 
 def _attack_text(technique: str, payload: str) -> str:
     if technique == "H6_tags":
-        return "Please see the attached rubric for details." + "".join(chr(0xE0000 + ord(c)) for c in payload)
+        return "Please see the attached rubric for details." + "".join(
+            chr(0xE0000 + ord(c)) for c in payload
+        )
     if technique == "H6_zerowidth":
         words = payload.split()
         return " ".join("​".join(w) if len(w) > 4 else w for w in words)
@@ -291,7 +298,9 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     entries = generate(args.out)
     attacked = sum(1 for e in entries if e.technique != "control")
-    print(f"wrote {len(entries)} documents ({attacked} attacked, {len(entries) - attacked} controls) to {args.out}")
+    print(
+        f"wrote {len(entries)} documents ({attacked} attacked, {len(entries) - attacked} controls) to {args.out}"
+    )
     return 0
 
 

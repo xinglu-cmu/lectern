@@ -52,7 +52,10 @@ def _overlaps(excerpt: str, payload: str) -> bool:
 
 
 def score(entries, out: Path) -> dict:
-    per: dict[str, dict] = {t: {"attacked": 0, "detected": 0, "directive": 0, "quarantined": 0, "fp": 0} for t in TECHNIQUES}
+    per: dict[str, dict] = {
+        t: {"attacked": 0, "detected": 0, "directive": 0, "quarantined": 0, "fp": 0}
+        for t in TECHNIQUES
+    }
     control_fp_by_detector: dict[str, int] = defaultdict(int)
     misses: list[dict] = []
     control_findings: list[dict] = []
@@ -60,23 +63,58 @@ def score(entries, out: Path) -> dict:
         a = analyze(out / e["file"], use_llm=False)
         if e["technique"] == "control":
             for f in a.findings:
-                if f.status is FindingStatus.quarantined or f.detector in ("H1", "H2", "H3", "H4", "H5", "H6"):
+                if f.status is FindingStatus.quarantined or f.detector in (
+                    "H1",
+                    "H2",
+                    "H3",
+                    "H4",
+                    "H5",
+                    "H6",
+                ):
                     control_fp_by_detector[f.detector] += 1
-                    control_findings.append({"file": e["file"], "detector": f.detector, "kind": f.kind, "excerpt": f.excerpt[:80]})
+                    control_findings.append(
+                        {
+                            "file": e["file"],
+                            "detector": f.detector,
+                            "kind": f.kind,
+                            "excerpt": f.excerpt[:80],
+                        }
+                    )
             continue
         row = per[e["technique"]]
         row["attacked"] += 1
-        hits = [f for f in a.findings if f.detector in e["expected_detectors"] and _overlaps(f.excerpt, e["payload"])]
+        hits = [
+            f
+            for f in a.findings
+            if f.detector in e["expected_detectors"] and _overlaps(f.excerpt, e["payload"])
+        ]
         if hits:
             row["detected"] += 1
         else:
-            misses.append({"file": e["file"], "expected": e["expected_detectors"], "found": sorted({f.detector for f in a.findings})})
+            misses.append(
+                {
+                    "file": e["file"],
+                    "expected": e["expected_detectors"],
+                    "found": sorted({f.detector for f in a.findings}),
+                }
+            )
         if any(f.detector == "D1" and _overlaps(f.excerpt, e["payload"]) for f in a.findings):
             row["directive"] += 1
-        if any(f.status is FindingStatus.quarantined and _overlaps(f.excerpt, e["payload"]) for f in a.findings):
+        if any(
+            f.status is FindingStatus.quarantined and _overlaps(f.excerpt, e["payload"])
+            for f in a.findings
+        ):
             row["quarantined"] += 1
 
-    results = {"techniques": {}, "controls": {"documents": sum(1 for e in entries if e["technique"] == "control"), "false_positive_findings": dict(control_fp_by_detector), "details": control_findings}, "misses": misses}
+    results = {
+        "techniques": {},
+        "controls": {
+            "documents": sum(1 for e in entries if e["technique"] == "control"),
+            "false_positive_findings": dict(control_fp_by_detector),
+            "details": control_findings,
+        },
+        "misses": misses,
+    }
     for t, row in per.items():
         detectors = {d for fmt_set in TECHNIQUES[t][1].values() for d in fmt_set}
         fp = sum(control_fp_by_detector[d] for d in detectors)
@@ -100,11 +138,19 @@ def to_markdown(results: dict) -> str:
     for t, r in results["techniques"].items():
         rec = f"{r['recall']:.2f}" if r["recall"] is not None else "–"
         prec = f"{r['precision']:.2f}" if r["precision"] is not None else "–"
-        lines.append(f"| {t} | {r['attacked']} | {r['detected']} | {rec} | {prec} | {r['directive']} | {r['quarantined']} |")
+        lines.append(
+            f"| {t} | {r['attacked']} | {r['detected']} | {rec} | {prec} | {r['directive']} | {r['quarantined']} |"
+        )
     c = results["controls"]
-    lines += ["", f"Controls: {c['documents']} clean documents; hidden-text findings on them: {c['false_positive_findings'] or 'none'}."]
+    lines += [
+        "",
+        f"Controls: {c['documents']} clean documents; hidden-text findings on them: {c['false_positive_findings'] or 'none'}.",
+    ]
     if results["misses"]:
-        lines += ["", "Misses:", ""] + [f"- `{m['file']}`: expected {m['expected']}, found {m['found']}" for m in results["misses"]]
+        lines += ["", "Misses:", ""] + [
+            f"- `{m['file']}`: expected {m['expected']}, found {m['found']}"
+            for m in results["misses"]
+        ]
     return "\n".join(lines) + "\n"
 
 
@@ -132,7 +178,9 @@ def main(argv: list[str] | None = None) -> int:
             or (r["precision"] is not None and r["precision"] < PRECISION_GATE)
         ]
         if bad:
-            print(f"GATE FAILED: {', '.join(bad)} (recall ≥ {RECALL_GATE}, precision ≥ {PRECISION_GATE})")
+            print(
+                f"GATE FAILED: {', '.join(bad)} (recall ≥ {RECALL_GATE}, precision ≥ {PRECISION_GATE})"
+            )
             return 1
         print("gates passed")
     return 0
