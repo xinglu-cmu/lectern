@@ -27,6 +27,17 @@ lectern mcp                                          # the engine as tools for A
 lectern serve                                        # review UI on localhost (in progress)
 ```
 
+**For pipelines.** As a GitHub Action:
+
+```yaml
+- uses: xinglu-cmu/lectern@main          # pin a release tag once v0.1 is out
+  with:
+    paths: docs/*.pdf uploads/*.docx
+    fail-on: critical                    # info | warning | critical
+```
+
+As a pre-commit hook (`.pre-commit-config.yaml`): `repo: https://github.com/xinglu-cmu/lectern`, hook id `lectern-scan`. Both run offline and fail the job with exit code 3 when a document carries hidden or AI-directed content at the chosen severity; the report says where.
+
 **For agents.** Add Lectern to Claude Code with `claude mcp add lectern -- lectern mcp`, or to Claude Desktop with `{"mcpServers": {"lectern": {"command": "lectern", "args": ["mcp"]}}}`. The agent gets three tools — `scan_document`, `clean_document`, `brief_document` — and an instruction to call `scan_document` on any file before reading it. Hidden text is quarantined inside Lectern and only *described* to the agent; it never enters the agent's context. Install with `pip install "lectern-cli[mcp]"`.
 
 **Status:** phase 1 done (CLI, detectors, evals; PRs #49, #50). Phase 2 — the local-first cut, MCP server and local UI — in progress. The [design doc](docs/DESIGN.md) (v3) and [ADRs](docs/adr/) explain every decision, including the two pivots.
