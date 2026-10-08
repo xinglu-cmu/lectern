@@ -19,7 +19,14 @@ from pathlib import Path
 
 import lectern
 from lectern.converters import load
-from lectern.llm import DEFAULT_MODEL, LLM, AnthropicLLM, LLMUnavailable, credentials_present
+from lectern.llm import (
+    DEFAULT_MODEL,
+    LLM,
+    AnthropicLLM,
+    LLMUnavailable,
+    LocalLLM,
+    credentials_present,
+)
 from lectern.models import Analysis, Finding, FindingStatus, Overview, Segment, Severity, Zone
 from lectern.overview import summarize
 from lectern.screen import Detector, screen
@@ -37,6 +44,7 @@ def analyze(
     use_llm: bool = True,
     llm: LLM | None = None,
     model: str = DEFAULT_MODEL,
+    local: bool | str = False,
     detectors: list[Detector] | None = None,
     block_detectors: list[BlockDetector] | None = None,
 ) -> Analysis:
@@ -66,11 +74,11 @@ def analyze(
     overview: Overview | None = None
     mode = "heuristic-only"
     if use_llm and llm is None:
-        llm = make_llm(model)
+        llm = make_llm(model, local=local)
         if llm is None:
             warnings.append(
                 "no ANTHROPIC_API_KEY found: zoning is heuristic-only and there is no overview "
-                "(same as --no-llm)"
+                "(same as --no-llm; or use --local with a model served by Ollama)"
             )
     if use_llm and llm is not None:
         try:
@@ -111,8 +119,11 @@ def analyze(
     )
 
 
-def make_llm(model: str = DEFAULT_MODEL) -> LLM | None:
-    """The model client for this run, or None when no credentials are present."""
+def make_llm(model: str = DEFAULT_MODEL, *, local: bool | str = False) -> LLM | None:
+    """The model client for this run: a local model when asked for (`--local`, optionally
+    naming the model), else Claude when credentials are present, else None."""
+    if local:
+        return LocalLLM(local if isinstance(local, str) else None)
     return AnthropicLLM(model) if credentials_present() else None
 
 

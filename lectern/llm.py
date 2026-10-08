@@ -14,7 +14,9 @@ Design rules (DESIGN §8):
   claim we measure.
 
 The default model is Claude Haiku 4.5 — small, fast and priced for running on
-every document. `--model` is the escape hatch.
+every document. `--model` is the escape hatch. `--local` swaps in `LocalLLM`: a
+model served on this machine (Ollama's HTTP API, JSON-schema constrained), so the
+AI step also needs no key and no network. Same protocol, same rules.
 """
 
 from __future__ import annotations
@@ -56,11 +58,91 @@ class LLM(Protocol):
 
 
 class LLMUnavailable(RuntimeError):
-    """No usable credentials or no network: the pipeline degrades to heuristics."""
+    """No usable credentials or no reachable model: the pipeline degrades to heuristics."""
 
 
 def credentials_present() -> bool:
     return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
+
+
+LOCAL_URL_DEFAULT = "http://127.0.0.1:11434"
+LOCAL_MODEL_DEFAULT = "llama3.2"
+
+
+class LocalLLM:
+    """A model served on this machine through Ollama's `/api/chat`, constrained by the
+    Pydantic schema (Ollama's `format` accepts a JSON schema). Zero cost, zero network;
+    speed is the machine's. Any reply that is not valid for the schema yields None."""
+
+    def __init__(
+        self,
+        model: str | None = None,
+        *,
+        base_url: str | None = None,
+        timeout: float = 180.0,
+    ) -> None:
+        self.base_url = (
+            base_url or os.environ.get("LECTERN_LOCAL_URL") or LOCAL_URL_DEFAULT
+        ).rstrip("/")
+        self.model = (
+            f"ollama:{model or os.environ.get('LECTERN_LOCAL_MODEL') or LOCAL_MODEL_DEFAULT}"
+        )
+        self.usage = LLMUsage(model=self.model)
+        self.timeout = timeout
+
+    @property
+    def model_name(self) -> str:
+        return self.model.split(":", 1)[1]
+
+    def parse(self, *, system: str, user: str, schema: type[T], max_tokens: int) -> T | None:
+        import json
+        import urllib.error
+        import urllib.request
+
+        body = json.dumps(
+            {
+                "model": self.model_name,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user},
+                ],
+                "format": schema.model_json_schema(),
+                "stream": False,
+                "options": {"temperature": 0, "num_predict": max_tokens},
+            }
+        ).encode()
+        req = urllib.request.Request(
+            f"{self.base_url}/api/chat", data=body, headers={"content-type": "application/json"}
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                data = json.loads(resp.read())
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                raise LLMUnavailable(
+                    f"local model '{self.model_name}' is not available at {self.base_url} "
+                    f"(ollama pull {self.model_name}?)"
+                ) from exc
+            self.usage.failures += 1
+            log.warning("local model HTTP %s; keeping heuristic result", exc.code)
+            return None
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            raise LLMUnavailable(f"cannot reach a local model at {self.base_url}: {exc}") from exc
+
+        self.usage.calls += 1
+        self.usage.input_tokens += int(data.get("prompt_eval_count") or 0)
+        self.usage.output_tokens += int(data.get("eval_count") or 0)
+        content = (data.get("message") or {}).get("content") or ""
+        if data.get("done_reason") == "length" or not content.strip():
+            self.usage.failures += 1
+            log.warning("local model stopped early or answered nothing; keeping heuristic result")
+            return None
+        try:
+            return schema.model_validate_json(content)
+        except ValueError:
+            self.usage.failures += 1
+            log.warning("local model reply did not match the schema; keeping heuristic result")
+            return None
 
 
 class AnthropicLLM:

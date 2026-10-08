@@ -1,6 +1,7 @@
 """`lectern` — the command-line front door (DESIGN §6).
 
-    lectern scan  DOC [--json] [--no-llm] [--full-text] [--fail-on LEVEL] [--model MODEL]
+    lectern scan  DOC [--json] [--no-llm | --local [MODEL]] [--full-text] [--fail-on LEVEL]
+                      [--model MODEL]
     lectern clean DOC [-o out.md] [--keep Z,Z] [--drop Z,Z] [--interactive]
                       [--no-llm] [--no-report] [--model MODEL]
     lectern brief DOC [-o brief.md] [--keep Z,Z] [--no-llm] [--model MODEL]
@@ -27,6 +28,18 @@ from lectern.models import Severity, Zone
 ZONES = [z.value for z in Zone]
 
 
+def _local_flag(sub: argparse.ArgumentParser) -> None:
+    sub.add_argument(
+        "--local",
+        nargs="?",
+        const=True,
+        default=False,
+        metavar="MODEL",
+        help="use a model served on this machine (Ollama at $LECTERN_LOCAL_URL, default "
+        "http://127.0.0.1:11434) instead of Claude; optionally name the model",
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="lectern",
@@ -46,6 +59,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="offline: heuristic zoning and pattern detectors only, no overview",
     )
     scan.add_argument("--full-text", action="store_true", help="also print every segment's text")
+    _local_flag(scan)
     scan.add_argument(
         "--fail-on",
         choices=[s.value for s in Severity],
@@ -69,6 +83,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="confirm each zone in the terminal before writing",
     )
     clean.add_argument("--no-llm", action="store_true", help="offline: heuristic zoning only")
+    _local_flag(clean)
     clean.add_argument("--no-report", action="store_true", help="omit the removal report footer")
     clean.add_argument(
         "--model", default=DEFAULT_MODEL, help=f"Claude model (default {DEFAULT_MODEL})"
@@ -82,6 +97,7 @@ def build_parser() -> argparse.ArgumentParser:
     brief.add_argument("-o", "--output", help="output file (default: stdout)")
     brief.add_argument("--keep", help="zones the clean copy would keep (for the last section)")
     brief.add_argument("--no-llm", action="store_true", help="offline: no model-written half")
+    _local_flag(brief)
     brief.add_argument(
         "--model", default=DEFAULT_MODEL, help=f"Claude model (default {DEFAULT_MODEL})"
     )
@@ -91,6 +107,7 @@ def build_parser() -> argparse.ArgumentParser:
         "mcp", help="run the MCP server on stdio (for Claude Code, Claude Desktop, agents)"
     )
     mcp.add_argument("--no-llm", action="store_true", help="never call a model from the tools")
+    _local_flag(mcp)
     mcp.set_defaults(func=cmd_mcp)
 
     serve = sub.add_parser(
@@ -99,6 +116,7 @@ def build_parser() -> argparse.ArgumentParser:
     serve.add_argument("--port", type=int, default=8765)
     serve.add_argument("--no-browser", action="store_true", help="don't open the browser")
     serve.add_argument("--no-llm", action="store_true", help="never call a model")
+    _local_flag(serve)
     serve.add_argument("--model", default=None, help=f"Claude model (default {DEFAULT_MODEL})")
     serve.set_defaults(func=cmd_serve)
     return parser
@@ -109,7 +127,7 @@ def _analyze_or_exit(args: argparse.Namespace):
 
     err = Console(stderr=True)
     try:
-        return analyze(args.doc, use_llm=not args.no_llm, model=args.model)
+        return analyze(args.doc, use_llm=not args.no_llm, model=args.model, local=args.local)
     except FileNotFoundError:
         err.print(f"[red]error:[/] file not found: {args.doc}")
     except UnsupportedFormat as exc:
@@ -152,7 +170,7 @@ def cmd_brief(args: argparse.Namespace) -> int:
         raise SystemExit(2)
 
     keep = resolve_selection(_parse_zones(args.keep, usage), None)
-    llm = None if args.no_llm else make_llm(args.model)
+    llm = None if args.no_llm else make_llm(args.model, local=args.local)
     try:
         analysis = analyze(args.doc, use_llm=not args.no_llm, llm=llm, model=args.model)
     except FileNotFoundError:
@@ -180,7 +198,7 @@ def cmd_mcp(args: argparse.Namespace) -> int:
             "[red]error:[/] the MCP server needs the `mcp` package: pip install 'lectern-cli[mcp]'"
         )
         return 1
-    build_server(use_llm=not args.no_llm).run(transport="stdio")
+    build_server(use_llm=not args.no_llm, local=args.local).run(transport="stdio")
     return 0
 
 
@@ -193,7 +211,11 @@ def cmd_serve(args: argparse.Namespace) -> int:
         )
         return 1
     serve_main(
-        args.port, open_browser=not args.no_browser, use_llm=not args.no_llm, model=args.model
+        args.port,
+        open_browser=not args.no_browser,
+        use_llm=not args.no_llm,
+        model=args.model,
+        local=args.local,
     )
     return 0
 
