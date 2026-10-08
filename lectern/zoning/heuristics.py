@@ -25,19 +25,21 @@ TASK_HEADINGS = re.compile(
     r"\b(deliverables?|requirements?|submission|submitting|what to submit|instructions?|"
     r"tasks?|your (task|job)|to ?do|questions?|problems?|exercises?|grading|rubric|"
     r"assessment|due|deadlines?|specifications?|scope of work|statement of work|"
-    r"evaluation criteria|acceptance criteria|must|shall|policies|policy|rules)\b",
+    r"evaluation criteria|acceptance criteria|criteria|how to apply|installation|setup|"
+    r"fees?|payment|must|shall|policies|policy|rules|announcements?|action items?)\b",
     re.I,
 )
 BACKGROUND_HEADINGS = re.compile(
     r"\b(introduction|background|overview|motivation|context|related work|summary|"
     r"abstract|description|learning (objectives|outcomes|goals)|objectives|goals|purpose|"
     r"glossary|definitions?|terminology|schedule|about|why|history|concepts?|theory|notes?|"
-    r"recap|review|discussion|conclusions?|results?|methods?|evaluation|experiments?)\b",
+    r"recap|discussion|conclusions?|results?|methods?|experiments?|"
+    r"what is in the box|what you will do|what we are looking for|minutes)\b",
     re.I,
 )
 EXAMPLE_HEADINGS = re.compile(
     r"\b(examples?|sample|samples|illustration|case study|demo|walkthrough|"
-    r"figures?|tables?|listings?|test cases?|expected output|starter code)\b",
+    r"listings?|test cases?|expected output|starter code|usage|worked example)\b",
     re.I,
 )
 STRUCTURE_HEADINGS = re.compile(
@@ -51,7 +53,7 @@ STRUCTURE_HEADINGS = re.compile(
 TASK_MARKERS = re.compile(
     r"\b(you (must|should|need to|will|are (required|expected|asked|encouraged) to|may)|"
     r"your (task|job|goal|submission|report|code|solution|answer|proposal|response)|"
-    r"must|should|shall|required|deliverables?|due|deadline|submit|submission|"
+    r"must|should|shall|required|deliverables?|due(?! to)|deadline|submit|submission|"
     r"turn in|hand in|upload|points?|pts|marks?|rubric|graded?|grading|"
     r"requirements?|the (system|application|vendor|contractor|proposal|bidder|solution) "
     r"(shall|must|will)|question \d+|q\d+\b|problem \d+|exercise \d+|part [a-z]\b|"
@@ -64,7 +66,9 @@ IMPERATIVE_START = re.compile(
     r"compare|discuss|analy[sz]e|evaluate|derive|plot|report|upload|choose|select|determine|"
     r"find|give|state|define|sketch|draw|justify|demonstrate|test|run|install|configure|"
     r"ensure|make sure|read|review|consider|note|attach|fill|follow|do not|don't|never|"
-    r"always|avoid|verify|check|measure|record|document|specify|propose|deliver)\b",
+    r"always|avoid|verify|check|measure|record|document|specify|propose|deliver|send|apply|"
+    r"email|register|pay|sign|photograph|label|mount|connect|restore|turn off|remove|press|"
+    r"open|confirm|update|reply|schedule|circulate|install|download|enter|click|return)\b",
     re.I,
 )
 BACKGROUND_MARKERS = re.compile(
@@ -84,7 +88,8 @@ LEGAL_BOILERPLATE = re.compile(
     r"privacy policy|cookies?|unsubscribe|click here|skip to (main )?content|sign in|log in|"
     r"follow us|share this|related articles|advertisement|powered by|reserves? the right|"
     r"public records?|does not (commit|constitute|obligate)|no obligation|without (notice|"
-    r"liability)|warrant(y|ies)|indemnif|liabilit(y|ies)|office hours|e-?mail:|phone:)",
+    r"liability)|\bwarrant(y|ies)\b|indemnif|\bliabilit(y|ies)\b|not for redistribution|"
+    r"intended only for the addressee|subject to change without notice)",
     re.I,
 )
 TOC_LINE = re.compile(r"(\.{3,}|…)\s*\d{1,4}\s*$|^\s*\d+(\.\d+)*\s+\S.*\s\d{1,4}\s*$", re.M)
@@ -112,7 +117,12 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
     signals: list[str] = []
     text = seg.text
     body = re.sub(r"^#+ .*$", "", text, flags=re.M).strip()  # text without its headings
-    heading = seg.heading_path[-1] if seg.heading_path else ""
+    # the section this segment belongs to: its last heading line if it carries one (a segment
+    # that pools the title with the first section is judged by that section), else the path
+    own_headings = [ln.lstrip("#").strip() for ln in text.splitlines() if ln.startswith("#")]
+    heading = (
+        own_headings[-1] if own_headings else (seg.heading_path[-1] if seg.heading_path else "")
+    )
     flags = set(seg.flags)
 
     # 0. hidden text: proved by a detector, never argued with
@@ -120,6 +130,20 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
     if hidden_flags:
         signals += [f"flag:{f}" for f in hidden_flags]
         return Zone.hidden, 0.95, signals
+
+    # 1a. a title block: the first segment, a top-level heading plus at most a line or two
+    #     (byline, course code, date) — the document's own masthead
+    if (
+        seg.seq == 1
+        and seg.heading_path
+        and seg.text.startswith("# ")
+        and len(body) <= 160
+        and body.count("\n") <= 1
+        and not IMPERATIVE_START.match(body)
+        and not TASK_MARKERS.search(body)
+    ):
+        signals.append("title_block")
+        return Zone.structure, 0.6, signals
 
     # 1. page furniture: headers, footers, page numbers
     furniture = flags & FURNITURE_FLAGS
@@ -206,7 +230,7 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
     if bg_heading:
         signals.append("heading:background")
 
-    if bg_heading and not task_heading and task_density < 1.0:
+    if bg_heading and not task_heading and imperatives < 2:
         # an overview, introduction or glossary stays background unless it is nothing but
         # instructions ("you will implement …" in an overview is still context)
         return Zone.background, 0.7 if task_density < 0.25 else 0.65, signals
@@ -225,4 +249,7 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
         return Zone.task, 0.5, signals
     if bg_hits:
         return Zone.background, 0.5, signals
+    if sentences and avg_len >= 8 and body.rstrip().endswith((".", "!", "?")):
+        signals.append("prose")
+        return Zone.background, 0.4, signals
     return Zone.unknown, 0.3, signals

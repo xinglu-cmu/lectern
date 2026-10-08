@@ -1,0 +1,11 @@
+[
+  {"match": "Office of Research Development · Issued", "zone": "structure"},
+  {"match": "The seed grant programme funds early-stage projects", "zone": "background"},
+  {"match": "Principal investigators must hold", "zone": "task"},
+  {"match": "A project description of no more than three pages", "zone": "task"},
+  {"match": "Submit a single PDF through the research portal", "zone": "task"},
+  {"match": "Proposals are scored on significance", "zone": "task"},
+  {"match": "A six-month project that assembles", "zone": "example"},
+  {"match": "Applicants may use AI writing tools", "zone": "ai_policy"},
+  {"match": "Warner Hall 3rd floor", "zone": "structure"}
+]

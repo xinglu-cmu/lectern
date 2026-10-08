@@ -1,0 +1,10 @@
+[
+  {"match": "Physics 101 · Section B", "zone": "structure"},
+  {"match": "To measure the local acceleration", "zone": "background"},
+  {"match": "For small angles, the period", "zone": "background"},
+  {"match": "We used a steel bob", "zone": "background"},
+  {"match": "| 0.30 | 1.10", "zone": "example"},
+  {"match": "Our value is 0.4% below", "zone": "background"},
+  {"match": "The pendulum method gives", "zone": "background"},
+  {"match": "Course lab manual, Experiment 3", "zone": "structure"}
+]

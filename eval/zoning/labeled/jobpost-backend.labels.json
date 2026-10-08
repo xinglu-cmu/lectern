@@ -1,0 +1,9 @@
+[
+  {"match": "Example Pay · Pittsburgh", "zone": "structure"},
+  {"match": "The Payments Platform team runs the ledger", "zone": "background"},
+  {"match": "Design and build services in Go and Java", "zone": "background"},
+  {"match": "Three or more years building backend services", "zone": "background"},
+  {"match": "Send a résumé and a short note", "zone": "task"},
+  {"match": "Monday: design review", "zone": "example"},
+  {"match": "equal opportunity employer", "zone": "structure"}
+]

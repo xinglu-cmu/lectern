@@ -1,0 +1,7 @@
+[
+  {"match": "Leadership moved the budget deadline", "zone": "background"},
+  {"match": "Update your project row", "zone": "task"},
+  {"match": "Please keep the risk line", "zone": "task"},
+  {"match": "10:00 Capacity recap", "zone": "background"},
+  {"match": "This message and any attachments are confidential", "zone": "structure"}
+]

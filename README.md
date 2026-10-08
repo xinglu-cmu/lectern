@@ -38,7 +38,7 @@ Following the [success measures](docs/DESIGN.md#14-success-measures). Numbers co
 | Measure | Now | Source |
 |---|---|---|
 | Hidden-text & directive detection | recall 1.00, precision 1.00 on every technique (white / 1pt / off-page text, CSS hiding, HTML comments, Word hidden runs, metadata payloads, Unicode tag smuggling, zero-width joiners, visible directives) over 72 attacked + 9 control synthetic documents; **0 false positives on controls** | [`eval/results/redteam.md`](eval/results/redteam.md), every PR |
-| Zoning accuracy, heuristic-only | macro-F1 0.86, accuracy 0.83 on 35 labeled segments across 6 authored documents | [`eval/results/zoning.md`](eval/results/zoning.md) |
+| Zoning accuracy, heuristic-only | macro-F1 0.91, accuracy 0.87 on 91 labeled segments across 15 authored documents (assignment, syllabus, RFP, article, spec, paper, email, contract, manual, lecture, job post, lab report, minutes, grant call, README); gate arms at 30 | [`eval/results/zoning.md`](eval/results/zoning.md) |
 | Zoning, +LLM / local ablation | not yet measured (no key and no local model on the build machine yet) | `python eval/zoning/run.py --llm` |
 | Cost per document | $0 offline; with Claude Haiku the report prints tokens and dollars (target $0.02–0.05) | the report |
 | Real users | phase 4 | — |

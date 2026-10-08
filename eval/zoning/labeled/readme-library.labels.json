@@ -1,0 +1,8 @@
+[
+  {"match": "Most projects that reach for a caching library", "zone": "background"},
+  {"match": "pip install tinycache", "zone": "example"},
+  {"match": "from tinycache import Cache", "zone": "example"},
+  {"match": "Entries older than", "zone": "background"},
+  {"match": "Open an issue before a large change", "zone": "task"},
+  {"match": "MIT © 2026", "zone": "structure"}
+]
