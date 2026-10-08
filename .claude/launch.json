@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "serve",
-      "runtimeExecutable": "lectern",
-      "runtimeArgs": ["serve", "--no-browser"],
+      "runtimeExecutable": ".venv/bin/lectern",
+      "runtimeArgs": ["serve", "--no-browser", "--no-llm"],
       "port": 8765
     }
   ]
