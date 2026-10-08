@@ -25,15 +25,24 @@ python eval/redteam/run.py --check
 "zone": "<zone>"}` entries; a produced segment takes the gold zone of the first phrase it
 contains, so labels survive changes in how the segmenter cuts. `run.py` reports accuracy, macro-F1
 per zone and a confusion matrix for heuristic-only zoning; `--llm` adds the Claude pass and the
-heuristic-vs-LLM delta (needs `ANTHROPIC_API_KEY`). v0 has 6 authored documents (assignment,
-syllabus, RFP, article, spec, paper); the plan is 30 by the midpoint and 60 by week 6, curated
-from real documents at ~5 a day.
+heuristic-vs-model delta (`--llm` needs `ANTHROPIC_API_KEY`; `--local` a model served by Ollama).
+v0.2 has 15 authored documents of as many kinds (assignment, syllabus, RFP, article, spec, paper,
+email, contract, manual, lecture, job post, lab report, minutes, grant call, README); `--check`
+arms the macro-F1 ≥ 0.75 gate once the set reaches 30 documents. Authored documents are a start;
+the set should grow with real ones, labelled by phrase.
 
 ```bash
 python eval/zoning/run.py            # heuristic-only
 python eval/zoning/run.py --llm      # + Claude Haiku, with the ablation delta
 ```
 
-## `conversion/` — converter snapshots (week 6)
+## `conversion/` — converter snapshots (every PR)
 
-Golden-file outputs of the converters on a fixed corpus; catches converter-upgrade regressions.
+`run.py` renders the red-team seeds clean as PDF/HTML/DOCX with Lectern's own writers and compares
+what the converters read (block type, level, flags, page, text) with the snapshots in `snapshots/`;
+any difference fails CI, `--update` rewrites after an intended change.
+
+```bash
+python eval/conversion/run.py            # compare
+python eval/conversion/run.py --update   # accept a change
+```

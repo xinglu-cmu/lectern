@@ -1,0 +1,9 @@
+[
+  {"match": "Turn off power to the heating system", "zone": "task"},
+  {"match": "The thermostat unit, a wall plate", "zone": "background"},
+  {"match": "The T-240 learns your schedule", "zone": "background"},
+  {"match": "Photograph the wiring of your old thermostat", "zone": "task"},
+  {"match": "| 06:30 | 20", "zone": "example"},
+  {"match": "If the screen stays blank", "zone": "background"},
+  {"match": "Two-year limited warranty", "zone": "structure"}
+]
