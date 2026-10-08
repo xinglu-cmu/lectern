@@ -1,0 +1,10 @@
+[
+  {"match": "This Statement of Work is entered into", "zone": "structure"},
+  {"match": "The Client operates a telemetry network", "zone": "background"},
+  {"match": "A revised leak-detection model retrained", "zone": "task"},
+  {"match": "The Provider must deliver items 1 and 2", "zone": "task"},
+  {"match": "Fees are fixed at", "zone": "task"},
+  {"match": "district=NW-07", "zone": "example"},
+  {"match": "All other terms of the Master Services Agreement", "zone": "structure"},
+  {"match": "Signed for the Provider", "zone": "structure"}
+]

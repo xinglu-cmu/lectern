@@ -1,0 +1,10 @@
+[
+  {"match": "Present: M. Alvarez", "zone": "structure"},
+  {"match": "The minutes of 21 August were approved", "zone": "background"},
+  {"match": "K. Osei reported income", "zone": "background"},
+  {"match": "R. Lindqvist summarised the responses", "zone": "background"},
+  {"match": "Action: R. Lindqvist to schedule vendor presentations", "zone": "task"},
+  {"match": "P. Nakamura reported 212 registrations", "zone": "background"},
+  {"match": "16 October 2026, 18:30", "zone": "background"},
+  {"match": "Minutes taken by T. Brennan", "zone": "structure"}
+]
