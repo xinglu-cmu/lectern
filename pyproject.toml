@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "lectern-cli"
 version = "0.1.0"
-description = "Lectern — know what your AI is reading. Scan documents for hidden prompts and AI-directed content, zone them by function, and emit clean Markdown."
+description = "Know what your AI is reading. Scan documents locally for hidden prompts and AI-directed content, zone them by function, and emit clean Markdown."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
@@ -32,13 +32,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-worker = [
-    "psycopg[binary]>=3.2",
-]
 dev = [
     "pytest>=8",
     "ruff>=0.6",
-    "psycopg[binary]>=3.2",
 ]
 
 [project.urls]
@@ -48,10 +44,9 @@ Issues = "https://github.com/xinglu-cmu/lectern/issues"
 
 [project.scripts]
 lectern = "lectern.cli:main"
-lectern-worker = "lectern_worker.main:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["lectern", "lectern_worker"]
+packages = ["lectern"]
 
 [tool.ruff]
 line-length = 100
@@ -59,6 +54,9 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"eval/**" = ["E501"]  # report scripts: long table rows and f-strings are clearer unwrapped
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

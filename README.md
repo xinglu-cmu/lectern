@@ -1,80 +1,62 @@
 # Lectern
 
-> **Know what your AI is reading.** Scan any document for hidden prompts and AI-directed content, see it zoned by what each part *is* — task, background, boilerplate — choose what survives, and get clean Markdown ready for any AI tool.
+> **Know what your AI is reading.** Scan any document for hidden prompts and AI-directed content, see it zoned by what each part *is* — task, background, boilerplate — choose what survives, and get clean Markdown ready for any AI tool. **Everything runs on your machine.**
 
-[![ci](https://github.com/xinglu-cmu/lectern/actions/workflows/ci.yml/badge.svg)](https://github.com/xinglu-cmu/lectern/actions/workflows/ci.yml) · [project board](https://github.com/users/xinglu-cmu/projects/1) · [milestones](https://github.com/xinglu-cmu/lectern/milestones) · [design doc](docs/DESIGN.md)
+[![ci](https://github.com/xinglu-cmu/lectern/actions/workflows/ci.yml/badge.svg)](https://github.com/xinglu-cmu/lectern/actions/workflows/ci.yml) · [design doc](docs/DESIGN.md) · [decisions](docs/adr/) · [evals](eval/README.md)
 
-Every AI workflow starts by feeding a document to a model that dives straight in. Nobody first asks: *what is this document, which parts are the actual work, and is anything in here — visible or hidden — trying to steer the AI?* Documents carry boilerplate that wastes context, stated AI policies, and sometimes literal hidden prompt injections (white text, 1pt fonts, metadata payloads). Lectern is the missing step in between:
+Every AI workflow starts by feeding a document to a model that dives straight in. Nobody first asks: *what is this document, which parts are the actual work, and is anything in here — visible or hidden — trying to steer the AI?* Documents carry boilerplate that wastes context, stated AI policies, and sometimes literal hidden prompt injections: white text, 1pt fonts, `display:none`, metadata payloads, instructions smuggled in invisible Unicode characters. Lectern is the missing step in between:
 
 ```bash
-lectern scan  assignment.pdf                      # overview + zone map + findings
-lectern clean assignment.pdf -o clean.md \
-              --keep task,background              # distilled Markdown + removal report
+pip install lectern-cli                              # (PyPI release: phase 4; until then, see Development)
+
+lectern scan  assignment.pdf                         # overview + zone map + findings, with locations
+lectern clean assignment.pdf -o clean.md --keep task,background   # distilled Markdown + removal report
+lectern scan  vendor.pdf --fail-on critical          # exit 3 on a hidden directive: a CI / ingest gate
 ```
 
-- **Screening** — detects invisible text, encoding tricks, metadata payloads, and AI-directed instructions; quarantines hidden content with a human-review path. *Detect → disclose → respect*: nothing is silently dropped, and instructions found inside documents are never obeyed.
-- **Functional zoning** — segments classified as `task` / `background` / `structure` / `example` / `ai_directive` / `ai_policy` / `hidden`, with confidence, via heuristics + an optional LLM pass.
-- **You choose** — keep/drop by zone (CLI flags or the web review UI), then export clean Markdown with a report of what was removed and why.
-- **Works offline** — conversion, heuristic zoning, all static detectors, and clean output run with `--no-llm`; an API key upgrades zoning quality and adds the overview.
+- **Screening** — six hidden-text detectors (colour against the real background, tiny font, off-page, format-level hiding in HTML and Word, metadata payloads, invisible-character tricks) plus detectors for AI-directed sentences and AI-use policies. Hidden content is quarantined *before any model reads the document* and reported with its location. *Detect → disclose → respect*: nothing is silently dropped, and instructions found inside documents are never obeyed.
+- **Functional zoning** — segments classified as `task` / `background` / `structure` / `example` / `ai_directive` / `ai_policy` / `hidden`, with confidence, via explainable heuristics plus an optional LLM pass.
+- **You choose** — keep/drop by zone (CLI flags, `--interactive`, or the local review UI), then export clean Markdown with a report of what was removed and why.
+- **Local by design** — no accounts, no server, no telemetry. Conversion, zoning, all detectors and clean output run offline; an Anthropic key (or, next, a local model) upgrades zoning and adds the overview.
 
-A web app (upload → async pipeline → interactive review → export) ships alongside the CLI — same engine, two front doors.
+Two more front doors on the same engine are in progress ([ADR-012](docs/adr/ADR-012-local-first.md)): **`lectern serve`**, a review UI on localhost, and **`lectern mcp`**, so Claude Desktop, Claude Code and other agents can screen a document before reading it.
 
-**Status:** week 3 of an 8-week build — the CLI is feature-complete for v1: `lectern scan` and `lectern clean` work end to end on PDF / DOCX / HTML / Markdown, offline or with Claude Haiku; hidden-text detectors H1–H6 quarantine invisible content; the red-team suite gates every PR. The web app starts in week 4. The [design doc](docs/DESIGN.md) (v2) and [ADRs](docs/adr/) — including [ADR-007](docs/adr/ADR-007-pivot-to-screening-tool.md), the pivot record — explain every decision.
-
-## Stack
-
-Python engine + CLI · Next.js/TypeScript web · Spring Boot (Java 21) API · PostgreSQL (`FOR UPDATE SKIP LOCKED` job queue) · Redis · Cloudflare R2 · Claude API (`claude-haiku-4-5`) · OpenTelemetry · CI gated by eval thresholds
-
-## Subsystems
-
-Each subsystem owns one hard part and is tested on its own:
-
-| Module | The hard part it owns |
-|---|---|
-| Engine & zoning | conversion interface over MarkItDown/Docling, functional-role classification, heuristic+LLM two-pass |
-| Screening layer | hidden-text & injection detection over PDF/HTML/DOCX, quarantine + human review |
-| CLI | scan/clean UX, offline mode, JSON output, CI-gate exit codes |
-| Async pipeline | idempotent Postgres job queue, retries, DLQ, SSE progress |
-| Web review UI | zone toggles, findings review, selection → export |
-| Evals | red-team corpus (precision/recall per technique), labeled zoning set (macro-F1 + ablation), conversion snapshots |
-| Ops | tracing, cost accounting per document, budgets, load testing, < $20/mo footprint |
+**Status:** phase 1 done (CLI, detectors, evals; PRs #49, #50). Phase 2 — the local-first cut, MCP server and local UI — in progress. The [design doc](docs/DESIGN.md) (v3) and [ADRs](docs/adr/) explain every decision, including the two pivots.
 
 ## Metrics
 
-Following the [success measures](docs/DESIGN.md#14-success-measures). Numbers are produced by the suites in [`eval/`](eval/README.md) and refreshed on every PR; the labeled zoning set is small (v0) and grows weekly.
+Following the [success measures](docs/DESIGN.md#14-success-measures). Numbers come from the suites in [`eval/`](eval/README.md) and are recomputed on every PR.
 
-| Measure | Now (week 3) | Source |
+| Measure | Now | Source |
 |---|---|---|
 | Hidden-text & directive detection | recall 1.00, precision 1.00 on every technique (white / 1pt / off-page text, CSS hiding, HTML comments, Word hidden runs, metadata payloads, Unicode tag smuggling, zero-width joiners, visible directives) over 72 attacked + 9 control synthetic documents; **0 false positives on controls** | [`eval/results/redteam.md`](eval/results/redteam.md), every PR |
-| Zoning accuracy, heuristic-only | macro-F1 0.86, accuracy 0.83 on 35 labeled segments across 6 authored documents (assignment, syllabus, RFP, article, spec, paper) | [`eval/results/zoning.md`](eval/results/zoning.md) |
-| Zoning, +LLM delta | not yet measured (needs an API key in CI) | `python eval/zoning/run.py --llm` |
-| Cost per document | accounted per run (`lectern scan` prints tokens and dollars); target $0.02–0.05 | — |
-| Real users, throughput, latency | weeks 4–7 | — |
+| Zoning accuracy, heuristic-only | macro-F1 0.86, accuracy 0.83 on 35 labeled segments across 6 authored documents | [`eval/results/zoning.md`](eval/results/zoning.md) |
+| Zoning, +LLM / local ablation | not yet measured | `python eval/zoning/run.py --llm` |
+| Cost per document | $0 offline; with Claude Haiku the report prints tokens and dollars (target $0.02–0.05) | the report |
+| Real users | phase 4 | — |
 
-The red-team corpus is synthetic and the detectors were built against the same technique list, so 1.00 means "catches what it was designed to catch", not "catches everything"; new techniques get added to the generator first.
+The red-team corpus is synthetic and the detectors were built against the same technique list, so 1.00 means "catches what it was designed to catch", not "catches everything". The first version of the colour detector scored 1.00 and then flagged white-on-red banners on a real slide deck; the fix (compare against the background actually drawn) is in [ADR-011](docs/adr/ADR-011-hidden-text-screening.md). New techniques go into the generator first.
+
+## How it works
+
+```
+load → screen (blocks) → segment → screen (text) → zone → summarize → emit
+```
+
+Own converters for PDF, HTML and DOCX keep what Markdown converters discard — colour, size, position, hidden flags of every run of text — because that is the evidence the detectors need. Block-level detectors run before segmentation and carve hidden text into its own blocks; D1/P1 pattern detectors run on segments; heuristics label every segment with a confidence and the reasons; segments under 0.7 confidence may get a second opinion from a model, with the document text passed as quoted data under a schema that cannot even express `hidden`. The `Analysis` that comes out is what the terminal report, `--json`, the clean copy, the UI and the MCP tools all render.
 
 ## Development
 
 ```bash
-make infra   # postgres + redis in docker
-make up      # build & run api + worker in docker too
-make web     # next.js dev server on :3000  (first: make web-install)
+python3 -m venv .venv && . .venv/bin/activate
+pip install -e ".[dev]"                 # engine + CLI + test tools
+make test                               # ruff + pytest
+make eval                               # red-team suite (gated) + zoning accuracy
+lectern scan README.md --no-llm         # it scans anything, including this file
+export ANTHROPIC_API_KEY=…              # optional: Claude Haiku zoning pass, D1 confirmation, overview
 ```
 
-Engine and CLI live in `worker/` as the `lectern` package (PyPI name `lectern-cli`; the import and the command are both `lectern`):
-
-```bash
-pip install -e "./worker[dev]"           # engine + CLI + worker + test tools
-lectern scan assignment.pdf --no-llm      # offline: heuristic zoning + all static detectors
-export ANTHROPIC_API_KEY=…                # adds the Claude Haiku zoning pass, D1 confirmation + overview
-lectern scan assignment.pdf               # ~$0.02–0.05 for a 20-page document
-lectern scan assignment.pdf --json        # the full analysis, for scripts and agents
-lectern scan assignment.pdf --fail-on critical   # exit 3 on a hidden directive: a CI / ingest gate
-lectern clean assignment.pdf -o clean.md --keep task,background   # clean copy + removal report
-lectern clean assignment.pdf --interactive                         # choose zones in the terminal
-```
-
-Supported inputs: PDF, HTML and DOCX through Lectern's own converters, which keep the colour, size, position and hidden flags of every run of text ([ADR-010](docs/adr/ADR-010-converter-pick.md)); PPTX via MarkItDown; Markdown and text. Detectors: H1 invisible colour, H2 tiny font, H3 off-page, H4 format-level hiding (`display:none`, zero size, fg≈bg, HTML comments, Word hidden runs), H5 metadata payloads, H6 encoding tricks (zero-width / bidi / tag characters, look-alike letters), D1 AI-directed text, P1 AI-use policies. CI runs api (Maven verify), worker (ruff + pytest + an offline `lectern scan` smoke test), and web (build) on every push; eval gates join in week 6.
+Supported inputs: PDF, HTML, DOCX (own converters), PPTX (MarkItDown), Markdown, text. Python ≥ 3.12. The package is `lectern`; the distribution name on PyPI will be `lectern-cli`.
 
 ## License
 
