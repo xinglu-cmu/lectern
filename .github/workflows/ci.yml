@@ -26,3 +26,5 @@ jobs:
         run: python eval/redteam/run.py --check
       - name: zoning accuracy (labeled set; reported, gated once the set reaches 30 documents)
         run: python eval/zoning/run.py
+      - name: conversion snapshots (what the converters read from the seed corpus)
+        run: python eval/conversion/run.py
