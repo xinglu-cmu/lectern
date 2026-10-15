@@ -1,0 +1,26 @@
+[
+  {
+    "match": "This course covers the core ideas",
+    "zone": "background"
+  },
+  {
+    "match": "After this course you will be able",
+    "zone": "background"
+  },
+  {
+    "match": "Course overview, probability review",
+    "zone": "background"
+  },
+  {
+    "match": "There are five homework assignments",
+    "zone": "task"
+  },
+  {
+    "match": "You may use AI assistants",
+    "zone": "ai_policy"
+  },
+  {
+    "match": "Instructor office hours",
+    "zone": "structure"
+  }
+]

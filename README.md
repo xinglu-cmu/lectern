@@ -19,7 +19,7 @@ lectern clean assignment.pdf -o clean.md \
 
 A web app (upload → async pipeline → interactive review → export) ships alongside the CLI — same engine, two front doors.
 
-**Status:** week 2 of an 8-week build — `lectern scan` works end to end (offline and with Claude Haiku); `lectern clean` and the hidden-text detectors land in week 3. The [design doc](docs/DESIGN.md) (v2) and [ADRs](docs/adr/) — including [ADR-007](docs/adr/ADR-007-pivot-to-screening-tool.md), the pivot record — explain every decision.
+**Status:** week 3 of an 8-week build — the CLI is feature-complete for v1: `lectern scan` and `lectern clean` work end to end on PDF / DOCX / HTML / Markdown, offline or with Claude Haiku; hidden-text detectors H1–H6 quarantine invisible content; the red-team suite gates every PR. The web app starts in week 4. The [design doc](docs/DESIGN.md) (v2) and [ADRs](docs/adr/) — including [ADR-007](docs/adr/ADR-007-pivot-to-screening-tool.md), the pivot record — explain every decision.
 
 ## Stack
 
@@ -41,7 +41,17 @@ Each subsystem owns one hard part and is tested on its own:
 
 ## Metrics
 
-Filled in as they become real (weeks 3–8), following the [success measures](docs/DESIGN.md#14-success-measures): real users, red-team detection precision/recall per technique, zoning macro-F1 (heuristic vs +LLM ablation), cost per document, pipeline throughput and P95 API latency.
+Following the [success measures](docs/DESIGN.md#14-success-measures). Numbers are produced by the suites in [`eval/`](eval/README.md) and refreshed on every PR; the labeled zoning set is small (v0) and grows weekly.
+
+| Measure | Now (week 3) | Source |
+|---|---|---|
+| Hidden-text & directive detection | recall 1.00, precision 1.00 on every technique (white / 1pt / off-page text, CSS hiding, HTML comments, Word hidden runs, metadata payloads, Unicode tag smuggling, zero-width joiners, visible directives) over 72 attacked + 9 control synthetic documents; **0 false positives on controls** | [`eval/results/redteam.md`](eval/results/redteam.md), every PR |
+| Zoning accuracy, heuristic-only | macro-F1 0.86, accuracy 0.83 on 35 labeled segments across 6 authored documents (assignment, syllabus, RFP, article, spec, paper) | [`eval/results/zoning.md`](eval/results/zoning.md) |
+| Zoning, +LLM delta | not yet measured (needs an API key in CI) | `python eval/zoning/run.py --llm` |
+| Cost per document | accounted per run (`lectern scan` prints tokens and dollars); target $0.02–0.05 | — |
+| Real users, throughput, latency | weeks 4–7 | — |
+
+The red-team corpus is synthetic and the detectors were built against the same technique list, so 1.00 means "catches what it was designed to catch", not "catches everything"; new techniques get added to the generator first.
 
 ## Development
 
@@ -55,13 +65,16 @@ Engine and CLI live in `worker/` as the `lectern` package (PyPI name `lectern-cl
 
 ```bash
 pip install -e "./worker[dev]"           # engine + CLI + worker + test tools
-lectern scan assignment.pdf --no-llm      # offline: heuristic zoning + pattern detectors
-export ANTHROPIC_API_KEY=…                # adds the Claude Haiku zoning pass + overview
+lectern scan assignment.pdf --no-llm      # offline: heuristic zoning + all static detectors
+export ANTHROPIC_API_KEY=…                # adds the Claude Haiku zoning pass, D1 confirmation + overview
 lectern scan assignment.pdf               # ~$0.02–0.05 for a 20-page document
 lectern scan assignment.pdf --json        # the full analysis, for scripts and agents
+lectern scan assignment.pdf --fail-on critical   # exit 3 on a hidden directive: a CI / ingest gate
+lectern clean assignment.pdf -o clean.md --keep task,background   # clean copy + removal report
+lectern clean assignment.pdf --interactive                         # choose zones in the terminal
 ```
 
-Supported inputs: PDF (own pdfplumber pass that keeps colour, size and position of every word, see [ADR-010](docs/adr/ADR-010-converter-pick.md)), DOCX / HTML / PPTX (via MarkItDown), Markdown and text. CI runs api (Maven verify), worker (ruff + pytest + an offline `lectern scan` smoke test), and web (build) on every push; eval gates join in week 6.
+Supported inputs: PDF, HTML and DOCX through Lectern's own converters, which keep the colour, size, position and hidden flags of every run of text ([ADR-010](docs/adr/ADR-010-converter-pick.md)); PPTX via MarkItDown; Markdown and text. Detectors: H1 invisible colour, H2 tiny font, H3 off-page, H4 format-level hiding (`display:none`, zero size, fg≈bg, HTML comments, Word hidden runs), H5 metadata payloads, H6 encoding tricks (zero-width / bidi / tag characters, look-alike letters), D1 AI-directed text, P1 AI-use policies. CI runs api (Maven verify), worker (ruff + pytest + an offline `lectern scan` smoke test), and web (build) on every push; eval gates join in week 6.
 
 ## License
 

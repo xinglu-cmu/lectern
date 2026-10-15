@@ -1,0 +1,98 @@
+{
+  "heuristic": {
+    "unlabeled": [],
+    "per_doc": {
+      "article-caching.md": {
+        "segments": 5,
+        "labeled": 5,
+        "accuracy": 0.8,
+        "mode": "heuristic-only"
+      },
+      "assignment-sorting.md": {
+        "segments": 7,
+        "labeled": 7,
+        "accuracy": 0.8571428571428571,
+        "mode": "heuristic-only"
+      },
+      "paper-injection.md": {
+        "segments": 7,
+        "labeled": 7,
+        "accuracy": 1.0,
+        "mode": "heuristic-only"
+      },
+      "rfp-portal.md": {
+        "segments": 5,
+        "labeled": 5,
+        "accuracy": 1.0,
+        "mode": "heuristic-only"
+      },
+      "spec-upload.md": {
+        "segments": 5,
+        "labeled": 5,
+        "accuracy": 0.6,
+        "mode": "heuristic-only"
+      },
+      "syllabus-ml.md": {
+        "segments": 6,
+        "labeled": 6,
+        "accuracy": 0.6666666666666666,
+        "mode": "heuristic-only"
+      }
+    },
+    "n": 35,
+    "accuracy": 0.8285714285714286,
+    "macro_f1": 0.8575783475783476,
+    "per_zone": {
+      "task": {
+        "precision": 0.6,
+        "recall": 1.0,
+        "f1": 0.7499999999999999,
+        "support": 6
+      },
+      "background": {
+        "precision": 1.0,
+        "recall": 0.6875,
+        "f1": 0.8148148148148148,
+        "support": 16
+      },
+      "structure": {
+        "precision": 1.0,
+        "recall": 0.8571428571428571,
+        "f1": 0.923076923076923,
+        "support": 7
+      },
+      "example": {
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1": 0.8,
+        "support": 4
+      },
+      "ai_policy": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      }
+    },
+    "confusion": {
+      "background": {
+        "background": 11,
+        "task": 4,
+        "example": 1
+      },
+      "example": {
+        "example": 4
+      },
+      "structure": {
+        "structure": 6,
+        "example": 1
+      },
+      "task": {
+        "task": 6
+      },
+      "ai_policy": {
+        "ai_policy": 2
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+[
+  {"match": "In this assignment you will implement three sorting", "zone": "background"},
+  {"match": "A comparison sort can do no better", "zone": "background"},
+  {"match": "Implement `bubble_sort`", "zone": "task"},
+  {"match": "Your code must run with Python 3.12", "zone": "task"},
+  {"match": "Correctness on hidden tests is worth", "zone": "task"},
+  {"match": "Use of generative AI tools", "zone": "ai_policy"},
+  {"match": "For the input `[3, 1, 2]`", "zone": "example"},
+  {"match": "Cormen, Leiserson", "zone": "structure"}
+]

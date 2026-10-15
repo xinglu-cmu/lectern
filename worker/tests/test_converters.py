@@ -69,7 +69,7 @@ def test_pdf_page_anchors_are_one_based(assignment_pdf: Path):
     assert pages == [1, 2]
 
 
-def test_html_via_markitdown(tmp_path: Path):
+def test_html_native_converter(tmp_path: Path):
     html = tmp_path / "page.html"
     html.write_text(
         "<html><head><title>Spec</title></head><body><h1>Spec</h1>"
@@ -78,7 +78,7 @@ def test_html_via_markitdown(tmp_path: Path):
         encoding="utf-8",
     )
     doc = load(html)
-    assert doc.converter == "markitdown"
+    assert doc.converter == "html"
     assert doc.title == "Spec"
     assert [b.type for b in doc.blocks] == [
         BlockType.heading,

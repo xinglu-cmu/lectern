@@ -1,0 +1,8 @@
+[
+  {"match": "| 1.0 | 2026-03-02 | Initial draft |", "zone": "structure"},
+  {"match": "The upload service accepts files", "zone": "background"},
+  {"match": "The service shall accept files up to 200 MB", "zone": "task"},
+  {"match": "The service must respond to a completed upload", "zone": "task"},
+  {"match": "POST /uploads HTTP/1.1", "zone": "example"},
+  {"match": "Resumable upload: an upload split", "zone": "background"}
+]

@@ -1,0 +1,109 @@
+{
+  "techniques": {
+    "H1_white": {
+      "attacked": 9,
+      "detected": 9,
+      "directive": 9,
+      "quarantined": 9,
+      "fp": 0,
+      "recall": 1.0,
+      "precision": 1.0
+    },
+    "H2_tiny": {
+      "attacked": 6,
+      "detected": 6,
+      "directive": 6,
+      "quarantined": 6,
+      "fp": 0,
+      "recall": 1.0,
+      "precision": 1.0
+    },
+    "H3_offpage": {
+      "attacked": 3,
+      "detected": 3,
+      "directive": 3,
+      "quarantined": 3,
+      "fp": 0,
+      "recall": 1.0,
+      "precision": 1.0
+    },
+    "H4_display": {
+      "attacked": 3,
+      "detected": 3,
+      "directive": 3,
+      "quarantined": 3,
+      "fp": 0,
+      "recall": 1.0,
+      "precision": 1.0
+    },
+    "H4_offscreen": {
+      "attacked": 3,
+      "detected": 3,
+      "directive": 3,
+      "quarantined": 3,
+      "fp": 0,
+      "recall": 1.0,
+      "precision": 1.0
+    },
+    "H4_comment": {
+      "attacked": 3,
+      "detected": 3,
+      "directive": 3,
+      "quarantined": 3,
+      "fp": 0,
+      "recall": 1.0,
+      "precision": 1.0
+    },
+    "H4_vanish": {
+      "attacked": 3,
+      "detected": 3,
+      "directive": 3,
+      "quarantined": 3,
+      "fp": 0,
+      "recall": 1.0,
+      "precision": 1.0
+    },
+    "H5_metadata": {
+      "attacked": 9,
+      "detected": 9,
+      "directive": 0,
+      "quarantined": 9,
+      "fp": 0,
+      "recall": 1.0,
+      "precision": 1.0
+    },
+    "H6_tags": {
+      "attacked": 9,
+      "detected": 9,
+      "directive": 9,
+      "quarantined": 9,
+      "fp": 0,
+      "recall": 1.0,
+      "precision": 1.0
+    },
+    "H6_zerowidth": {
+      "attacked": 9,
+      "detected": 9,
+      "directive": 9,
+      "quarantined": 0,
+      "fp": 0,
+      "recall": 1.0,
+      "precision": 1.0
+    },
+    "D1_visible": {
+      "attacked": 9,
+      "detected": 9,
+      "directive": 9,
+      "quarantined": 0,
+      "fp": 0,
+      "recall": 1.0,
+      "precision": 1.0
+    }
+  },
+  "controls": {
+    "documents": 9,
+    "false_positive_findings": {},
+    "details": []
+  },
+  "misses": []
+}
