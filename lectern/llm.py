@@ -66,7 +66,7 @@ def credentials_present() -> bool:
 
 
 LOCAL_URL_DEFAULT = "http://127.0.0.1:11434"
-LOCAL_MODEL_DEFAULT = "llama3.2"
+LOCAL_MODEL_DEFAULT = "qwen2.5:7b"  # ADR-013
 
 
 class LocalLLM:

@@ -127,6 +127,11 @@ def to_markdown(heur: dict, llm: dict | None, local: dict | None = None) -> str:
         lines.append(
             f"| delta | {llm['accuracy'] - heur['accuracy']:+.2f} | {llm['macro_f1'] - heur['macro_f1']:+.2f} |"
         )
+    if local:
+        lines.append(f"| + local | {local['accuracy']:.2f} | {local['macro_f1']:.2f} |")
+        lines.append(
+            f"| delta | {local['accuracy'] - heur['accuracy']:+.2f} | {local['macro_f1'] - heur['macro_f1']:+.2f} |"
+        )
     lines += [
         "",
         "Per zone (heuristic-only):",

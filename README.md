@@ -50,7 +50,7 @@ Following the [success measures](docs/DESIGN.md#14-success-measures). Numbers co
 |---|---|---|
 | Hidden-text & directive detection | recall 1.00, precision 1.00 on every technique (white / 1pt / off-page text, CSS hiding, HTML comments, Word hidden runs, metadata payloads, Unicode tag smuggling, zero-width joiners, visible directives) over 72 attacked + 9 control synthetic documents; **0 false positives on controls** | [`eval/results/redteam.md`](eval/results/redteam.md), every PR |
 | Zoning accuracy, heuristic-only | macro-F1 0.91, accuracy 0.87 on 91 labeled segments across 15 authored documents (assignment, syllabus, RFP, article, spec, paper, email, contract, manual, lecture, job post, lab report, minutes, grant call, README); gate arms at 30 | [`eval/results/zoning.md`](eval/results/zoning.md) |
-| Zoning, +LLM / local ablation | not yet measured (no key and no local model on the build machine yet) | `python eval/zoning/run.py --llm` |
+| Zoning, +LLM / local ablation | macro-F1 0.89 with Claude Haiku (−0.02), 0.81 with local `qwen2.5:7b` (−0.10), 0.77 with `qwen2.5:3b` (−0.14) on the same 91 segments; zero schema misses locally; 4.5 s / 7.7 s / 3.7 s per document; Haiku ≈ $0.0034 per document. Both model passes lose on one boundary (requirements about someone else: *task* vs *background*), see [ADR-013](docs/adr/ADR-013-local-model-choice.md) | `python eval/zoning/run.py --llm --local` |
 | Cost per document | $0 offline; with Claude Haiku the report prints tokens and dollars (target $0.02–0.05) | the report |
 | Real users | phase 4 | — |
 
@@ -73,7 +73,7 @@ make test                               # ruff + pytest
 make eval                               # red-team suite (gated) + zoning accuracy
 lectern scan README.md --no-llm         # it scans anything, including this file
 export ANTHROPIC_API_KEY=…              # optional: Claude Haiku zoning pass, D1 confirmation, overview
-lectern scan assignment.pdf --local     # or a model served on this machine (Ollama), no key, no network
+lectern scan assignment.pdf --local     # or a model served on this machine (Ollama; `ollama pull qwen2.5:7b`), no key, no network
 ```
 
 Supported inputs: PDF, HTML, DOCX (own converters), PPTX (MarkItDown), Markdown, text. Python ≥ 3.12. The package is `lectern`; the distribution name on PyPI will be `lectern-cli`.
