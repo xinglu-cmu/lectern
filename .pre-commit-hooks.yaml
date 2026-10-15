@@ -1,0 +1,19 @@
+# Use Lectern as a pre-commit hook: documents added to a repository are screened for hidden
+# prompts and AI-directed content before they are committed.
+#
+#   repos:
+#     - repo: https://github.com/xinglu-cmu/lectern
+#       rev: v0.1.0
+#       hooks:
+#         - id: lectern-scan
+#           args: ["--fail-on", "critical"]
+#
+- id: lectern-scan
+  name: lectern scan
+  description: Screen documents for hidden prompts and AI-directed content (offline).
+  entry: lectern scan --no-llm --json --fail-on critical
+  language: python
+  types_or: [pdf, html, markdown, text]
+  files: \.(pdf|docx|pptx|html?|md|markdown|txt)$
+  pass_filenames: true
+  require_serial: false

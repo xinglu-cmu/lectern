@@ -1,0 +1,10 @@
+[
+  {"match": "15-122 Principles of Imperative Computation", "zone": "structure"},
+  {"match": "Homework 4 is due Thursday", "zone": "task"},
+  {"match": "Last lecture we needed a data structure", "zone": "background"},
+  {"match": "A hash function maps a key", "zone": "background"},
+  {"match": "Insert the strings", "zone": "example"},
+  {"match": "Two properties: it is cheap to compute", "zone": "background"},
+  {"match": "Read chapter 11 of the textbook", "zone": "task"},
+  {"match": "Not for redistribution", "zone": "structure"}
+]

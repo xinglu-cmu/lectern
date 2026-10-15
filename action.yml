@@ -1,0 +1,39 @@
+name: "Lectern scan"
+description: "Screen documents for hidden prompts and AI-directed content before they enter an AI pipeline; fail the job on findings at or above a severity."
+author: "Xing Lu"
+branding:
+  icon: "shield"
+  color: "purple"
+
+inputs:
+  paths:
+    description: "Files to scan, one per line or space-separated (PDF, DOCX, HTML, PPTX, Markdown, text)."
+    required: true
+  fail-on:
+    description: "Severity that fails the job: info, warning or critical."
+    required: false
+    default: "critical"
+  version:
+    description: "lectern-cli version to install (pip specifier), e.g. '==0.1.0'. Default: latest."
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install lectern
+      shell: bash
+      run: python3 -m pip install --quiet "lectern-cli${{ inputs.version }}"
+    - name: Scan
+      shell: bash
+      run: |
+        status=0
+        for f in ${{ inputs.paths }}; do
+          echo "::group::lectern scan $f"
+          lectern scan "$f" --no-llm --fail-on "${{ inputs['fail-on'] }}" || status=$?
+          echo "::endgroup::"
+        done
+        if [ "$status" -eq 3 ]; then
+          echo "::error::Lectern found content at or above '${{ inputs['fail-on'] }}' severity (see the groups above)."
+        fi
+        exit $status
