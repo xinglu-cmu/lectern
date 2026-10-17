@@ -1,0 +1,10 @@
+[
+  {"match": "[Product](https://example.org/product)", "zone": "structure"},
+  {"match": "We use cookies to keep you signed in", "zone": "structure"},
+  {"match": "Quillnote is a note-taking app that keeps", "zone": "background"},
+  {"match": "Every note is Markdown on disk", "zone": "background"},
+  {"match": "| Devices | 1 | unlimited", "zone": "background"},
+  {"match": "I moved 3,000 notes from another app", "zone": "background"},
+  {"match": "Create a free account; no card needed", "zone": "task"},
+  {"match": "© 2026 Quillnote, Inc.", "zone": "structure"}
+]

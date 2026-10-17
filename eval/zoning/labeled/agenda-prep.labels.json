@@ -1,0 +1,9 @@
+[
+  {"match": "Room 4B and video link", "zone": "structure"},
+  {"match": "We have three proposals that each touch", "zone": "background"},
+  {"match": "Read all three proposals", "zone": "task"},
+  {"match": "Continuous settlement, phase 2 (Priya", "zone": "background"},
+  {"match": "The ledger processes about 15,000 writes a minute", "zone": "background"},
+  {"match": "Items raised but out of scope", "zone": "background"},
+  {"match": "Dial-in: +1 412 555 0100", "zone": "structure"}
+]

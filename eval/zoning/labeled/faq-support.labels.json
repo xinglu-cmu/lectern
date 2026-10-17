@@ -1,0 +1,38 @@
+[
+  {
+    "match": "These are the questions our support team answers",
+    "zone": "background"
+  },
+  {
+    "match": "The free plan includes unlimited notes",
+    "zone": "background"
+  },
+  {
+    "match": "Home › Help Center › FAQ",
+    "zone": "structure"
+  },
+  {
+    "match": "Sync is part of the paid plans",
+    "zone": "background"
+  },
+  {
+    "match": "Open the sign-in page and choose",
+    "zone": "task"
+  },
+  {
+    "match": "Settings › Export produces a zip file",
+    "zone": "background"
+  },
+  {
+    "match": "Your account moves to the free plan",
+    "zone": "background"
+  },
+  {
+    "match": "We do not read them except to investigate",
+    "zone": "background"
+  },
+  {
+    "match": "Was this page helpful?",
+    "zone": "structure"
+  }
+]

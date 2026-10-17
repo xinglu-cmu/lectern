@@ -11,8 +11,8 @@ how the segmenter cuts.
 
 `--llm` also runs the Claude pass (needs `ANTHROPIC_API_KEY`), `--local` the local
 model (Ollama), and each reports its delta over heuristic-only — the ablation
-DESIGN §9 asks for. `--check` applies the gate (macro-F1 ≥ 0.75) once the set
-holds 30 documents.
+DESIGN §9 asks for. `--check` applies the gate (macro-F1 ≥ 0.75); it arms itself
+once the set holds 30 documents, which it has since v0.3.
 """
 
 from __future__ import annotations

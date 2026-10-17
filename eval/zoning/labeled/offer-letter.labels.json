@@ -1,0 +1,34 @@
+[
+  {
+    "match": "We are pleased to offer you the position",
+    "zone": "background"
+  },
+  {
+    "match": "600 Grant Street, Suite 2400",
+    "zone": "structure"
+  },
+  {
+    "match": "Your starting salary will be",
+    "zone": "background"
+  },
+  {
+    "match": "Your anticipated start date is Monday",
+    "zone": "background"
+  },
+  {
+    "match": "This offer is contingent on satisfactory completion",
+    "zone": "background"
+  },
+  {
+    "match": "Sign and date this letter and return it",
+    "zone": "task"
+  },
+  {
+    "match": "Director of Engineering, Harbor Pay",
+    "zone": "structure"
+  },
+  {
+    "match": "This letter is not a contract of employment",
+    "zone": "structure"
+  }
+]

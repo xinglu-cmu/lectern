@@ -56,8 +56,14 @@ SYSTEM = f"""You classify segments of a document by their function for a reader 
 the document to an AI tool and keep only what matters. {TRUST_BOUNDARY}
 
 Zones:
-- task: the actual work — requirements, questions, deliverables, instructions to the human reader.
-- background: context needed to understand the task — narrative, definitions, motivation.
+- task: what the reader of this document is asked to do, answer, deliver, decide or build — \
+requirements, questions, deliverables, instructions, action items addressed to the reader.
+- background: context needed to understand the task — narrative, definitions, motivation, and \
+requirement-shaped text that describes someone or something else: a role's duties, a course's \
+learning outcomes, a product's behaviour explained to its user, a decision already taken, a report \
+of results. Ask who acts on the sentence: the reader (task) or someone else (background). A spec \
+read by its implementers and an RFP read by its bidders are task; a job post's "what you will do" \
+and a syllabus's "you will be able to" are background.
 - structure: boilerplate carrying no content — headers, footers, tables of contents, navigation, \
 legal notices, references lists.
 - example: samples, datasets, worked examples, code, figures or tables that illustrate rather \

@@ -7,7 +7,7 @@ test: ## lint, format check, tests
 	ruff check . && ruff format --check . && python3 -m pytest -q
 
 eval: ## red-team suite (gated) + zoning accuracy + conversion snapshots
-	python3 eval/redteam/run.py --check && python3 eval/zoning/run.py && python3 eval/conversion/run.py
+	python3 eval/redteam/run.py --check && python3 eval/zoning/run.py --check && python3 eval/conversion/run.py
 
 scan: ## try the CLI offline: make scan DOC=path/to/file.pdf
 	lectern scan "$(DOC)" --no-llm

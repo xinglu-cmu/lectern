@@ -1,0 +1,9 @@
+[
+  {"match": "Co-located with the Harbor Conference", "zone": "structure"},
+  {"match": "Language models now read documents that were written", "zone": "background"},
+  {"match": "We invite work on, among other things", "zone": "background"},
+  {"match": "Submit papers of up to 8 pages", "zone": "task"},
+  {"match": "Submission deadline: 20 January 2027", "zone": "background"},
+  {"match": "Authors may use language models to polish writing", "zone": "ai_policy"},
+  {"match": "Lena Chen (Orin University)", "zone": "structure"}
+]
