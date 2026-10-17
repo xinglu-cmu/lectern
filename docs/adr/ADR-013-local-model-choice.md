@@ -89,3 +89,18 @@ Per zone, F1 (heuristic / Claude / qwen2.5:7b): task 0.82 / 0.87 / 0.68 · backg
 **What changed.** With the rule in the prompt, Claude went from −0.02 to level with the heuristics and is now the best column on *task* (0.87); its remaining errors are spread (9 background → task, 7 structure → background). The local model did not pick the rule up: 26 of its 49 errors are still background → task, the same confusion as before, now on more documents. The 7b model follows the schema perfectly and the prose definition poorly. `qwen2.5:3b` was not re-run; nothing in the 7b result suggests it would do better.
 
 **Consequences for the plan.** The ablation table in the README carries these numbers. `qwen2.5:7b` stays the local default: it is still the measured best local option, and the heuristics-first design means the local pass only touches segments the heuristics were unsure of. The distillation question (DESIGN §8, G7) is now answerable: with Claude level with the heuristics on the gold reading and the local model a clear step below, the distilled classifier's training labels can come from Claude on an unlabeled corpus, evaluated against this gold set; the next step is that corpus. Open: the labeled set should grow with real documents (target 60 in phase 4), and the local prompt may need few-shot examples of the boundary rather than a definition, which is a cheap experiment before any training.
+
+## Addendum, 2026-10-16 (later the same day): few-shot examples of the boundary
+
+The "cheap experiment" above was run next: six one-line examples of the task / background line (section › sentence → zone, with a half-sentence of reason each) were added to the zoning prompt after the zone definitions, outside the `<document>` block. The examples are paraphrases of the kinds in the labeled set, not its sentences. Same harness, same 30 documents, same models:
+
+| mode | accuracy | macro-F1 | errors | background → task | wall time, 30 docs |
+|---|---:|---:|---:|---:|---:|
+| + Claude, definition only | 0.86 | 0.88 | 25 | 9 | ≈ 3 min |
+| + Claude, definition + examples | 0.87 | 0.88 | 24 | 7 | ≈ 3 min |
+| + local `qwen2.5:7b`, definition only | 0.73 | 0.79 | 50 | 26 | 250 s (8.3 s/doc) |
+| + local `qwen2.5:7b`, definition + examples | 0.81 | 0.82 | 35 | 10 | 284 s (9.5 s/doc) |
+
+Per zone, F1 for the local model before → after: task 0.68 → 0.82, background 0.71 → 0.82, structure 0.72 → 0.73, example 0.86 → 0.86, ai_policy 1.00 → 0.88 (one policy segment lost, one segment newly called ai_directive).
+
+**Decision: keep the examples.** They cost the local model about one second per document and remove most of its boundary errors (26 → 10); Claude is unchanged within noise. The local column is now 0.07 under the heuristics instead of 0.09 and, more usefully, its errors are no longer one systematic confusion. For distillation this means a definition is not enough for a 7B model and examples are; the distilled classifier should be trained on labels produced with this prompt. Still open: the local pass remains below the heuristics-only floor on this set, so `--local` stays opt-in and does not become the default without a key (DESIGN §15, open decision 5).

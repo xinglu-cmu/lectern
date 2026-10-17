@@ -74,6 +74,20 @@ text as its subject is not ai_directive.
 - ai_policy: rules about the use of AI tools ("use of generative AI is not permitted").
 - unknown: none of the above fits, or you cannot tell.
 
+The task / background line, by example (section › sentence → zone):
+- Job post › What you will do › "Build and operate the services behind every transaction." → \
+background: it describes the role, the reader is not being told to build anything.
+- Syllabus › Learning outcomes › "After this course you will be able to train a classifier." → \
+background: an outcome, not an assignment.
+- Request for proposals › Scope of work › "The vendor shall deliver a redesigned portal by \
+March." → task: the reader is the bidder who must deliver it.
+- Specification › Requirements › "The service must respond within 500 ms." → task: the reader \
+implements the service.
+- Minutes › Actions › "Action: M. Alvarez to circulate the scoring sheet before the next meeting." \
+→ task: addressed to the people the minutes go to.
+- Press release › "The company today announced a new settlement service." → background: a report \
+of something done, nothing asked of the reader.
+
 Return one label per segment id, each id exactly once. Judge each segment by what it does in the \
 document, using its section path. Confidence: high when the function is obvious, medium when \
 plausible, low when guessing."""
