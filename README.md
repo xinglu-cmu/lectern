@@ -17,14 +17,14 @@ lectern scan  vendor.pdf --fail-on critical          # exit 3 on a hidden direct
 - **Screening** — six hidden-text detectors (colour against the real background, tiny font, off-page, format-level hiding in HTML and Word, metadata payloads, invisible-character tricks) plus detectors for AI-directed sentences and AI-use policies. Hidden content is quarantined *before any model reads the document* and reported with its location. *Detect → disclose → respect*: nothing is silently dropped, and instructions found inside documents are never obeyed.
 - **Functional zoning** — segments classified as `task` / `background` / `structure` / `example` / `ai_directive` / `ai_policy` / `hidden`, with confidence, via explainable heuristics plus an optional LLM pass.
 - **You choose** — keep/drop by zone (CLI flags, `--interactive`, or the local review UI), then export clean Markdown with a report of what was removed and why.
-- **Local by design** — no accounts, no server, no telemetry. Conversion, zoning, all detectors and clean output run offline; an Anthropic key (or, next, a local model) upgrades zoning and adds the overview.
+- **Local by design** — no accounts, no server, no telemetry. Conversion, zoning, all detectors and clean output run offline; an Anthropic key or a local model (`--local`, Ollama) upgrades zoning and adds the overview.
 
 Three front doors on one engine, all local ([ADR-012](docs/adr/ADR-012-local-first.md)):
 
 ```bash
 lectern brief assignment.pdf                         # one page: what it is, what it asks, what was found
 lectern mcp                                          # the engine as tools for AI agents (stdio)
-lectern serve                                        # review UI on localhost (in progress)
+lectern serve                                        # review UI on localhost
 ```
 
 **For pipelines.** As a GitHub Action:
@@ -40,7 +40,7 @@ As a pre-commit hook (`.pre-commit-config.yaml`): `repo: https://github.com/xing
 
 **For agents.** Add Lectern to Claude Code with `claude mcp add lectern -- lectern mcp`, or to Claude Desktop with `{"mcpServers": {"lectern": {"command": "lectern", "args": ["mcp"]}}}`. The agent gets three tools — `scan_document`, `clean_document`, `brief_document` — and an instruction to call `scan_document` on any file before reading it. Hidden text is quarantined inside Lectern and only *described* to the agent; it never enters the agent's context. Install with `pip install "lectern-cli[mcp]"`.
 
-**Status:** phase 1 done (CLI, detectors, evals; PRs #49, #50). Phase 2 — the local-first cut, MCP server and local UI — in progress. The [design doc](docs/DESIGN.md) (v3) and [ADRs](docs/adr/) explain every decision, including the two pivots.
+**Status:** phases 1 and 2 done (CLI, detectors, evals, brief, MCP server, local review UI; PRs #49, #50, #57). Phase 3 — the local-model path, the labeled set at 30 with the zoning gate on, the ablation ([ADR-013](docs/adr/ADR-013-local-model-choice.md)) — is in progress; the distilled classifier is what remains. The [design doc](docs/DESIGN.md) (v3) and [ADRs](docs/adr/) explain every decision, including the two pivots.
 
 ## Metrics
 
