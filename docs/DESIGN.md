@@ -189,6 +189,6 @@ Lectern works if people and agents use it on their own documents and it catches 
 1. ~~Converter pick~~ — [ADR-010](adr/ADR-010-converter-pick.md).
 2. ~~PyPI name~~ — `lectern-cli` ([ADR-010](adr/ADR-010-converter-pick.md)).
 3. ~~`scan --fail-on`~~ — shipped.
-4. UI stack for `lectern serve`: vanilla HTML/JS served by FastAPI (no build step, ships in the wheel) vs a small React/Next build — decide at the start of phase 2; default is vanilla unless the selection view demands more.
-5. Local model default: which small model, and whether `--local` becomes the default when no key is present — decided by the phase-3 ablation.
+4. ~~UI stack for `lectern serve`~~ — vanilla HTML/JS served by FastAPI, no build step (phase 2, PR #57).
+5. ~~Local model default~~ — `qwen2.5:7b` through Ollama; `--local` stays opt-in, since the local pass still scores under the heuristics-only floor on the labeled set ([ADR-013](adr/ADR-013-local-model-choice.md) and addenda).
 6. MCP transport: stdio first (Claude Desktop/Code); HTTP transport only if a user asks.
