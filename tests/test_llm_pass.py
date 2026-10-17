@@ -12,7 +12,7 @@ from lectern.zoning.llm_pass import (
     LLMZone,
     ZoneBatch,
     ZoneLabel,
-    _batches,
+    batches,
     zone_with_llm,
 )
 
@@ -113,10 +113,10 @@ def test_schema_has_no_hidden_zone():
 
 def test_batches_respect_size_and_token_limits():
     segs = [_seg(i, text="word " * 1500) for i in range(1, 60)]  # ~1900 est tokens each, capped
-    batches = _batches(segs)
-    assert all(len(b) <= BATCH_MAX_SEGMENTS for b in batches)
-    assert sum(len(b) for b in batches) == len(segs)
-    assert len(batches) > 2
+    out = batches(segs)
+    assert all(len(b) <= BATCH_MAX_SEGMENTS for b in out)
+    assert sum(len(b) for b in out) == len(segs)
+    assert len(out) > 2
     assert LLM_THRESHOLD == 0.7
 
 
