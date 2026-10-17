@@ -1,0 +1,12 @@
+[
+  {"match": "This tutorial takes about twenty minutes", "zone": "background"},
+  {"match": "A branch is nothing more than a file", "zone": "background"},
+  {"match": "Run the following in a repository", "zone": "task"},
+  {"match": "git switch -c add-readme", "zone": "example"},
+  {"match": "Create a file and commit it", "zone": "task"},
+  {"match": "echo \"# My project\" > README.md", "zone": "example"},
+  {"match": "Switch to `main` and merge", "zone": "task"},
+  {"match": "git merge add-readme", "zone": "example"},
+  {"match": "Make a commit on `main` before merging", "zone": "task"},
+  {"match": "Part of the Harbor Learning series", "zone": "structure"}
+]

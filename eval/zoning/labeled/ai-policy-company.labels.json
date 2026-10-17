@@ -1,0 +1,9 @@
+[
+  {"match": "Owner: Information Security", "zone": "structure"},
+  {"match": "This policy exists so that we get that benefit", "zone": "background"},
+  {"match": "This policy applies to all employees", "zone": "background"},
+  {"match": "Use only the tools on the approved list", "zone": "ai_policy"},
+  {"match": "| Harbor Assist (enterprise) | yes", "zone": "example"},
+  {"match": "report it to security@example.org the same day", "zone": "ai_policy"},
+  {"match": "Previous version: Policy 14 rev. 1", "zone": "structure"}
+]

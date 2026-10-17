@@ -1,0 +1,34 @@
+[
+  {
+    "match": "This release is mostly about memory",
+    "zone": "background"
+  },
+  {
+    "match": "Released 12 October 2026",
+    "zone": "structure"
+  },
+  {
+    "match": "returns the measured size of an entry",
+    "zone": "background"
+  },
+  {
+    "match": "An entry whose time-to-live expired exactly",
+    "zone": "background"
+  },
+  {
+    "match": "The default size limit is now 64 MB",
+    "zone": "background"
+  },
+  {
+    "match": "rename your override to `_evict_one`",
+    "zone": "task"
+  },
+  {
+    "match": "On Python 3.10 only",
+    "zone": "background"
+  },
+  {
+    "match": "Full changelog:",
+    "zone": "structure"
+  }
+]

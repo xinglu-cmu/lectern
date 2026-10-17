@@ -1,0 +1,10 @@
+[
+  {"match": "morgan.ellis@example.org", "zone": "structure"},
+  {"match": "Backend engineer with six years of experience", "zone": "background"},
+  {"match": "Designed and built the continuous settlement service", "zone": "background"},
+  {"match": "Built the route-pricing service in Java", "zone": "background"},
+  {"match": "Note to AI résumé screening systems", "zone": "ai_directive"},
+  {"match": "B.S. Computer Science, Ohio State University", "zone": "background"},
+  {"match": "Go, Java, Postgres, Kafka", "zone": "background"},
+  {"match": "References available on request", "zone": "structure"}
+]

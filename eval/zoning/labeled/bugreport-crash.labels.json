@@ -1,0 +1,9 @@
+[
+  {"match": "Opened by r-lindqvist", "zone": "structure"},
+  {"match": "Since upgrading to 2.4.0, a cache with a size limit", "zone": "background"},
+  {"match": "tinycache 2.4.0 · Python 3.12.4", "zone": "background"},
+  {"match": "c = Cache(max_bytes=1024)", "zone": "example"},
+  {"match": "The generator entry is evicted", "zone": "background"},
+  {"match": "Traceback (most recent call last)", "zone": "example"},
+  {"match": "Pinning to 2.3.2 avoids the problem", "zone": "background"}
+]

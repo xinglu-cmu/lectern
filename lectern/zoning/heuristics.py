@@ -26,7 +26,7 @@ TASK_HEADINGS = re.compile(
     r"tasks?|your (task|job)|to ?do|questions?|problems?|exercises?|grading|rubric|"
     r"assessment|due|deadlines?|specifications?|scope of work|statement of work|"
     r"evaluation criteria|acceptance criteria|criteria|how to apply|installation|setup|"
-    r"fees?|payment|must|shall|policies|policy|rules|announcements?|action items?)\b",
+    r"fees?|payment|must|shall|policies|policy|rules|announcements?|action items?|step \d+)\b",
     re.I,
 )
 BACKGROUND_HEADINGS = re.compile(
@@ -37,6 +37,12 @@ BACKGROUND_HEADINGS = re.compile(
     r"what is in the box|what you will do|what we are looking for|minutes)\b",
     re.I,
 )
+ROLE_HEADINGS = re.compile(  # about someone else: background, however imperative (ADR-013)
+    r"\b(what you(’|')?ll do|what you will do|what we(’|')?re looking for|what we are looking for|"
+    r"responsibilities|duties|learning (objectives|outcomes|goals)|course (objectives|outcomes)|"
+    r"qualifications|who you are|about the (role|team|job|position|company))\b",
+    re.I,
+)
 EXAMPLE_HEADINGS = re.compile(
     r"\b(examples?|sample|samples|illustration|case study|demo|walkthrough|"
     r"listings?|test cases?|expected output|starter code|usage|worked example)\b",
@@ -45,7 +51,7 @@ EXAMPLE_HEADINGS = re.compile(
 STRUCTURE_HEADINGS = re.compile(
     r"\b(table of contents|contents|references|bibliography|acknowledge?ments|index|"
     r"revision history|version history|change ?log|colophon|legal notice|copyright|"
-    r"terms( and conditions)?|legal|disclaimer|contact( us| information)?|"
+    r"terms and conditions|terms of (use|service)|legal|disclaimer|contact( us| information)?|"
     r"related (posts|articles))\b",
     re.I,
 )
@@ -79,8 +85,9 @@ BACKGROUND_MARKERS = re.compile(
     re.I,
 )
 EXAMPLE_MARKERS = re.compile(
-    r"^(\W*)(for example|e\.g\.|example \d*|sample (input|output|solution|run)|"
-    r"expected output|consider the following|suppose|input:|output:|>>>|\$ )",
+    r"^(\W*)(for example|e\.g\.|example( \d+)?\s*:|example \d+\b|"
+    r"sample (input|output|solution|run)|expected output|consider the following|suppose|"
+    r"input:|output:|>>>|\$ )",
     re.I | re.M,
 )
 LEGAL_BOILERPLATE = re.compile(
@@ -89,15 +96,21 @@ LEGAL_BOILERPLATE = re.compile(
     r"follow us|share this|related articles|advertisement|powered by|reserves? the right|"
     r"public records?|does not (commit|constitute|obligate)|no obligation|without (notice|"
     r"liability)|\bwarrant(y|ies)\b|indemnif|\bliabilit(y|ies)\b|not for redistribution|"
-    r"intended only for the addressee|subject to change without notice)",
+    r"intended only for the addressee|subject to change without notice|governed by the laws|"
+    r"unenforceable|severab|supersedes any prior|not a contract)",
     re.I,
 )
+TABLE_CONTENT_HEADINGS = re.compile(
+    r"\b(schedule|timetable|calendar|plans?|pricing|agenda|important dates|office hours)\b", re.I
+)
+TERMS_HEADING = re.compile(r"^(\d+[.)]?\s*)?terms$", re.I)
+FENCED_CODE = re.compile(r"```.*?```", re.S)
 TOC_LINE = re.compile(r"(\.{3,}|…)\s*\d{1,4}\s*$|^\s*\d+(\.\d+)*\s+\S.*\s\d{1,4}\s*$", re.M)
 URL = re.compile(r"https?://|www\.|\]\([^)]+\)", re.I)  # bare URLs and Markdown links
 CODE_LINE = re.compile(
     r"[;{}]\s*$|^\s*(def|class|import|from|return|if|for|while|var|let|const|int|void|public|#include)\b|[=<>!]=|\(\)|->|=>|\$\s"
 )
-_SENTENCES = re.compile(r"(?<=[.!?])\s+|\n+")
+_SENTENCES = re.compile(r"(?<=[.!?])(?<![A-Z]\.)\s+|\n+")
 
 
 def zone_heuristics(segments: list[Segment], findings: list[Finding]) -> None:
@@ -167,13 +180,17 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
 
     # 3. sections whose heading says "boilerplate" (before the code/table rules: a
     #    revision-history table is structure, not an example)
-    if STRUCTURE_HEADINGS.search(heading):
+    if STRUCTURE_HEADINGS.search(heading) or TERMS_HEADING.match(heading.strip()):
         signals.append("heading:structure")
         return Zone.structure, 0.75, signals
 
     # 4. code, tables, examples
     if "code_heavy" in flags:
         signals.append("flag:code_heavy")
+        if re.search(r"\|\s*(revision|version)\s*\|", body, re.I):
+            return Zone.structure, 0.75, signals
+        if TABLE_CONTENT_HEADINGS.search(heading) and not EXAMPLE_HEADINGS.search(heading):
+            return Zone.background, 0.6, signals
         return Zone.example, 0.9, signals
     code_lines = [ln for ln in body.splitlines() if ln.strip()]
     code_like = sum(1 for ln in code_lines if CODE_LINE.search(ln))
@@ -195,11 +212,16 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
     if toc_lines >= 3 or re.search(r"\btable of contents\b", heading + " " + text[:80], re.I):
         signals.append(f"toc_lines={toc_lines}")
         return Zone.structure, 0.85, signals
-    lines = [ln for ln in body.splitlines() if ln.strip()]
+    prose = FENCED_CODE.sub("", body).strip()
+    lines = [ln for ln in prose.splitlines() if ln.strip()]
     short_lines = sum(1 for ln in lines if len(ln.split()) <= 4)
-    urls = len(URL.findall(body))
-    legal = len(LEGAL_BOILERPLATE.findall(body))
-    if legal and (seg.tokens_est <= 80 or (legal >= 2 and seg.tokens_est <= 160)):
+    urls = len(URL.findall(prose))
+    sentences = [s for s in _SENTENCES.split(prose) if s and s.strip()]
+    legal = len(LEGAL_BOILERPLATE.findall(prose))
+    # boilerplate must be most of the segment, not a footer merged into a real section
+    legal_share = sum(len(s) for s in sentences if LEGAL_BOILERPLATE.search(s)) / max(1, len(prose))
+    short = seg.tokens_est <= 80 or (legal >= 2 and seg.tokens_est <= 160)
+    if legal and legal_share >= 0.5 and short:
         signals.append(f"boilerplate={legal}")
         return Zone.structure, 0.8, signals
     if urls >= 2 and seg.tokens_est <= 60 and len(lines) <= 3:
@@ -210,11 +232,13 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
         return Zone.structure, 0.7, signals
 
     # 5. task vs background
-    sentences = [s for s in _SENTENCES.split(body) if s and s.strip()]
+    if ROLE_HEADINGS.search(heading):
+        signals.append("heading:role")
+        return Zone.background, 0.7, signals
     n_sent = max(1, len(sentences))
     imperatives = sum(1 for s in sentences if IMPERATIVE_START.match(s.strip()))
-    task_hits = len(TASK_MARKERS.findall(body)) + imperatives
-    bg_hits = len(BACKGROUND_MARKERS.findall(body))
+    task_hits = len(TASK_MARKERS.findall(prose)) + imperatives
+    bg_hits = len(BACKGROUND_MARKERS.findall(prose))
     task_density = task_hits / n_sent
     avg_len = sum(len(s.split()) for s in sentences) / n_sent
     task_heading = bool(TASK_HEADINGS.search(heading))
@@ -249,7 +273,7 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
         return Zone.task, 0.5, signals
     if bg_hits:
         return Zone.background, 0.5, signals
-    if sentences and avg_len >= 8 and body.rstrip().endswith((".", "!", "?")):
+    if sentences and avg_len >= 8 and prose.endswith((".", "!", "?")):
         signals.append("prose")
         return Zone.background, 0.4, signals
     return Zone.unknown, 0.3, signals

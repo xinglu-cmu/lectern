@@ -57,6 +57,8 @@ def test_d1_leaves_ordinary_instructions_alone(text):
         "Use of generative AI tools such as ChatGPT is not permitted for this assignment.",
         "You may use AI assistants for brainstorming, but you must disclose their use.",
         "Submissions that violate the academic integrity policy on LLMs receive zero credit.",
+        "Authors may use language models to polish writing and must disclose doing so.",
+        "Do not enter customer personal data or source code into any AI tool.",
     ],
 )
 def test_p1_catches_ai_use_policies(text):

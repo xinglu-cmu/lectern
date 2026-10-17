@@ -107,3 +107,54 @@ def test_end_to_end_heuristics_on_the_assignment(assignment_md: Path):
     assert by_heading[("Policies",)].zone is Zone.ai_policy
     assert by_heading[("References",)].zone is Zone.structure
     assert by_heading[("Assignment 2: Sorting",)].zone in (Zone.background, Zone.task)
+
+
+def test_role_headings_stay_background_even_when_imperative():
+    # ADR-013: requirement-shaped text about someone else's work is background
+    seg = _zone(
+        "- Design and build services in Go and Java that process settlements.\n"
+        "- Own the reliability of what you ship: dashboards, alerts, runbooks.",
+        path=["Backend Engineer", "What you will do"],
+    )
+    assert seg.zone is Zone.background and "heading:role" in seg.signals
+
+
+def test_a_footer_merged_into_a_real_section_is_not_boilerplate():
+    seg = _zone(
+        "Read chapter 11 of the textbook and attempt exercise 11.3; we will start from "
+        "its solution.\n\nSlides based on material by the course staff. Not for redistribution.",
+        path=["Before next class"],
+    )
+    assert seg.zone is Zone.task
+    assert _zone("© 2026 Example Corp. All rights reserved. Not for redistribution.").zone is (
+        Zone.structure
+    )
+
+
+def test_initials_do_not_split_sentences():
+    seg = _zone(
+        "- K. Osei reported income of $12,400 and expenditure of $9,850 for August, "
+        "leaving reserves of $61,200. The roof repair invoice has not yet arrived. "
+        "The report was received.",
+        path=["Minutes", "Treasurer's report"],
+    )
+    assert seg.zone is Zone.background
+
+
+def test_fenced_code_does_not_turn_a_step_into_structure():
+    seg = _zone(
+        "Run the following in a repository with at least one commit. Use a name that says "
+        "what the branch is for.\n\n```\ngit switch -c add-readme\ncat .git/HEAD\n"
+        "cat .git/refs/heads/add-readme\n```\n\nThe first `cat` shows that HEAD now names "
+        "your new branch.",
+        path=["Step 1: Create a branch"],
+    )
+    assert seg.zone is Zone.task
+
+
+def test_tables_are_content_under_schedule_headings_and_structure_as_revision_history():
+    table = "| Week | Topic |\n|---|---|\n| 1 | Overview |\n| 2 | Regression |"
+    assert _zone(table, path=["Schedule"], flags=["code_heavy"]).zone is Zone.background
+    assert _zone(table, path=["Results"], flags=["code_heavy"]).zone is Zone.example
+    rev = "| Revision | Date | Change |\n|---|---|---|\n| 1 | 2022-05-10 | First issue |"
+    assert _zone(rev, flags=["code_heavy"]).zone is Zone.structure

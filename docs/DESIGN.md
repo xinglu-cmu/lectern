@@ -134,7 +134,7 @@ Haiku: ~$0.02–0.05 per 20-page document, accounted per run and printed. Local:
 Unchanged in substance; status updated:
 
 1. **Red-team detection** (`eval/redteam/`): ✅ generator (3 seeds × PDF/HTML/DOCX × 11 techniques), deterministic, every PR, gated at recall ≥ 0.90 / precision ≥ 0.80 per technique. Grows with every new technique; real documents remain the manual false-positive check ([ADR-011](adr/ADR-011-hidden-text-screening.md)).
-2. **Zoning accuracy** (`eval/zoning/`): ✅ harness with phrase-based gold labels; v0 = 6 documents. Target 30 (phase 2), 60 (phase 3); gate macro-F1 ≥ 0.75 switches on at 30. `--llm` and `--local` report the ablation.
+2. **Zoning accuracy** (`eval/zoning/`): ✅ harness with phrase-based gold labels; v0.3 = 30 authored documents, gate macro-F1 ≥ 0.75 on in CI. Target 60 (phase 4), with real documents. `--llm` and `--local` report the ablation ([ADR-013](adr/ADR-013-local-model-choice.md)).
 3. **Conversion snapshots** (`eval/conversion/`): golden-file outputs for a fixed redistributable corpus — phase 3.
 
 ## 10. Observability and ops

@@ -1,0 +1,9 @@
+[
+  {"match": "| 1 | 2022-05-10 | First issue", "zone": "structure"},
+  {"match": "This procedure covers the use of hydrofluoric acid", "zone": "background"},
+  {"match": "HF is corrosive and, unlike other acids", "zone": "background"},
+  {"match": "The laboratory manager maintains the stock", "zone": "background"},
+  {"match": "Confirm that the fume hood's face velocity", "zone": "task"},
+  {"match": "If HF touches skin: flush with water", "zone": "task"},
+  {"match": "printed copies are uncontrolled", "zone": "structure"}
+]

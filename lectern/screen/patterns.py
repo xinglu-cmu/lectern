@@ -70,7 +70,8 @@ DIRECTIVE_PATTERNS: list[re.Pattern[str]] = [
 AI_TERMS = re.compile(
     r"\b(generative ai|gen ?ai|ai tools?|ai assistants?|ai(-| )generated|ai(-| )based|"
     r"artificial intelligence|chatgpt|gpt-?\d|copilot|claude|gemini|bard|"
-    r"large language models?|llms?|machine[- ]generated)\b",
+    r"(large )?language models?|llms?|machine[- ]generated|model[- ]generated|"
+    r"ai (systems?|services?|assistance|use|usage|writing)|ai[- ]assisted)\b",
     re.I,
 )
 POLICY_TERMS = re.compile(
@@ -78,7 +79,8 @@ POLICY_TERMS = re.compile(
     r"are (not )?allowed|is (not )?allowed|permitted|permissible|acceptable use|"
     r"academic (integrity|honesty|misconduct)|plagiarism|disclos(e|ure|ed)|"
     r"cite|acknowledg(e|ed|ement)|with(out)? (prior |explicit )?permission|policy|policies|"
-    r"may be used|can be used|encouraged to use|use of|using|usage|violation|penalt(y|ies))\b",
+    r"may be used|can be used|encouraged to use|use of|using|usage|violation|penalt(y|ies)|"
+    r"do not|never|must|should( not)?|approved|unapproved)\b",
     re.I,
 )
 

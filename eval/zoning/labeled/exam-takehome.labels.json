@@ -1,0 +1,12 @@
+[
+  {"match": "Released Monday 19 October 2026", "zone": "structure"},
+  {"match": "Answer all four questions", "zone": "task"},
+  {"match": "The use of generative AI tools", "zone": "ai_policy"},
+  {"match": "Give a tight asymptotic bound", "zone": "task"},
+  {"match": "def f(n):", "zone": "example"},
+  {"match": "Determine which of the standard algorithms", "zone": "task"},
+  {"match": "| 1,000 | 2 |", "zone": "example"},
+  {"match": "Prove that any comparison-based algorithm", "zone": "task"},
+  {"match": "Design a data structure that supports insert", "zone": "task"},
+  {"match": "Honor pledge", "zone": "structure"}
+]

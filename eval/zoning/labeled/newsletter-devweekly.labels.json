@@ -1,0 +1,34 @@
+[
+  {
+    "match": "This week's issue is a little shorter",
+    "zone": "background"
+  },
+  {
+    "match": "View this email in your browser",
+    "zone": "structure"
+  },
+  {
+    "match": "Postgres 18 ships asynchronous I/O",
+    "zone": "background"
+  },
+  {
+    "match": "A quieter month for JavaScript runtimes",
+    "zone": "background"
+  },
+  {
+    "match": "The ACM study on AI-assisted code review",
+    "zone": "background"
+  },
+  {
+    "match": "Send your entry to challenge@example.org",
+    "zone": "task"
+  },
+  {
+    "match": "Harbor Pay is hiring a backend engineer",
+    "zone": "background"
+  },
+  {
+    "match": "You are receiving this because you signed up",
+    "zone": "structure"
+  }
+]

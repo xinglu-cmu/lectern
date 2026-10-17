@@ -1,0 +1,11 @@
+[
+  {"match": "Last updated: 1 September 2026", "zone": "structure"},
+  {"match": "Quillnote is a note-taking application", "zone": "background"},
+  {"match": "You must be at least 16 years old", "zone": "task"},
+  {"match": "You may not use the service to store or share", "zone": "task"},
+  {"match": "You keep ownership of everything you write", "zone": "background"},
+  {"match": "Paid plans are billed monthly or yearly", "zone": "background"},
+  {"match": "We may suspend or close your account", "zone": "background"},
+  {"match": "We may change these terms", "zone": "background"},
+  {"match": "governed by the laws of the State of Delaware", "zone": "structure"}
+]

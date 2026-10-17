@@ -1,0 +1,10 @@
+[
+  {"match": "today announced Instant Settlement", "zone": "background"},
+  {"match": "Small merchants carry the cost of settlement delay", "zone": "background"},
+  {"match": "We built the ledger to settle continuously", "zone": "background"},
+  {"match": "The rollout follows a six-month pilot", "zone": "background"},
+  {"match": "enabled by default for new merchants", "zone": "background"},
+  {"match": "Harbor Pay provides payment processing", "zone": "structure"},
+  {"match": "Jordan Lee, Communications", "zone": "structure"},
+  {"match": "forward-looking statements", "zone": "structure"}
+]

@@ -24,7 +24,7 @@ jobs:
           python -c "import json; a=json.load(open('/tmp/scan.json')); assert a['segments'], a"
       - name: red-team suite (gates recall ≥ 0.90, precision ≥ 0.80 per technique)
         run: python eval/redteam/run.py --check
-      - name: zoning accuracy (labeled set; reported, gated once the set reaches 30 documents)
-        run: python eval/zoning/run.py
+      - name: zoning accuracy (labeled set, 30 documents; gates heuristic macro-F1 ≥ 0.75)
+        run: python eval/zoning/run.py --check
       - name: conversion snapshots (what the converters read from the seed corpus)
         run: python eval/conversion/run.py
