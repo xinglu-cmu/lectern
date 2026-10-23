@@ -17,7 +17,7 @@ lectern scan  vendor.pdf --fail-on critical          # exit 3 on a hidden direct
 - **Screening** — six hidden-text detectors (colour against the real background, tiny font, off-page, format-level hiding in HTML and Word, metadata payloads, invisible-character tricks) plus detectors for AI-directed sentences and AI-use policies. Hidden content is quarantined *before any model reads the document* and reported with its location. *Detect → disclose → respect*: nothing is silently dropped, and instructions found inside documents are never obeyed.
 - **Functional zoning** — segments classified as `task` / `background` / `structure` / `example` / `ai_directive` / `ai_policy` / `hidden`, with confidence, via explainable heuristics plus an optional LLM pass.
 - **You choose** — keep/drop by zone (CLI flags, `--interactive`, or the local review UI), then export clean Markdown with a report of what was removed and why.
-- **Local by design** — no accounts, no server, no telemetry. Conversion, zoning, all detectors and clean output run offline; an Anthropic key or a local model (`--local`, Ollama) upgrades zoning and adds the overview.
+- **Local by design** — no accounts, no server, no telemetry. Conversion, zoning, all detectors and clean output run offline; an Anthropic key or a local model (`--local`, Ollama) upgrades zoning and adds the overview; `--distilled` re-zones the unsure segments with a built-in classifier trained on Claude's labels, with no key, no network and no model server.
 
 Three front doors on one engine, all local ([ADR-012](docs/adr/ADR-012-local-first.md)):
 
@@ -40,7 +40,7 @@ As a pre-commit hook (`.pre-commit-config.yaml`): `repo: https://github.com/xing
 
 **For agents.** Add Lectern to Claude Code with `claude mcp add lectern -- lectern mcp`, or to Claude Desktop with `{"mcpServers": {"lectern": {"command": "lectern", "args": ["mcp"]}}}`. The agent gets three tools — `scan_document`, `clean_document`, `brief_document` — and an instruction to call `scan_document` on any file before reading it. Hidden text is quarantined inside Lectern and only *described* to the agent; it never enters the agent's context. Install with `pip install "lectern-cli[mcp]"`.
 
-**Status:** phases 1 and 2 done (CLI, detectors, evals, brief, MCP server, local review UI; PRs #49, #50, #57). Phase 3 — the local-model path, the labeled set at 30 with the zoning gate on, the ablation ([ADR-013](docs/adr/ADR-013-local-model-choice.md)) — is in progress; the distilled classifier is what remains. The [design doc](docs/DESIGN.md) (v3) and [ADRs](docs/adr/) explain every decision, including the two pivots.
+**Status:** phases 1–3 done: CLI, detectors, evals, brief, MCP server, local review UI (PRs #49, #50, #57); the local-model path, the labeled set at 30 with the zoning gate on, the distilled classifier and the four-column ablation ([ADR-013](docs/adr/ADR-013-local-model-choice.md), [ADR-014](docs/adr/ADR-014-distilled-classifier.md)). Phase 4 — onboarding, PyPI, connectors, the Gateway — is next. The [design doc](docs/DESIGN.md) (v3) and [ADRs](docs/adr/) explain every decision, including the two pivots.
 
 ## Metrics
 
@@ -50,7 +50,7 @@ Following the [success measures](docs/DESIGN.md#14-success-measures). Numbers co
 |---|---|---|
 | Hidden-text & directive detection | recall 1.00, precision 1.00 on every technique (white / 1pt / off-page text, CSS hiding, HTML comments, Word hidden runs, metadata payloads, Unicode tag smuggling, zero-width joiners, visible directives) over 72 attacked + 9 control synthetic documents; **0 false positives on controls** | [`eval/results/redteam.md`](eval/results/redteam.md), every PR |
 | Zoning accuracy, heuristic-only | macro-F1 0.89, accuracy 0.85 on 184 labeled segments across 30 authored documents of as many kinds (assignment, syllabus, RFP, spec, paper, contract, minutes, résumé, press release, terms of service, SOP, landing page, …); the macro-F1 ≥ 0.75 gate is on in CI | [`eval/results/zoning.md`](eval/results/zoning.md), every PR |
-| Zoning, +LLM / local ablation | macro-F1 0.88 with Claude Haiku (−0.01; accuracy +0.02), 0.82 with local `qwen2.5:7b` (−0.07; accuracy −0.04) on the same 184 segments; zero schema misses; about 6 s / 9.5 s per document. Both model passes get the settled task/background rule ("who acts on this sentence?") as a definition plus six examples; the examples moved the local model from 0.79 to 0.82 and cut its background→task confusions from 26 to 10, see [ADR-013](docs/adr/ADR-013-local-model-choice.md) | `python eval/zoning/run.py --llm --local` |
+| Zoning, the four options side by side | on the same 184 segments, macro-F1 / accuracy: heuristics 0.89 / 0.85; **+ distilled classifier 0.89 / 0.86** (`--distilled`: 119 kB, no key, no network, no model server, no measurable time); + local `qwen2.5:7b` 0.82 / 0.81 (`--local`, ≈ 9.5 s per document); + Claude Haiku 0.87 / 0.86 (≈ 6 s and a third of a cent per document). Zero schema misses in either model pass. The classifier was trained on Claude's labels over 59 public documents and only re-zones the segments the heuristics were unsure about; both model passes get the settled task/background rule ("who acts on this sentence?") as a definition plus six examples. [ADR-013](docs/adr/ADR-013-local-model-choice.md), [ADR-014](docs/adr/ADR-014-distilled-classifier.md) | `python eval/zoning/run.py --llm --local --distilled` |
 | Cost per document | $0 offline; with Claude Haiku the report prints tokens and dollars (target $0.02–0.05) | the report |
 | Real users | phase 4 | — |
 
@@ -74,6 +74,7 @@ make eval                               # red-team suite (gated) + zoning accura
 lectern scan README.md --no-llm         # it scans anything, including this file
 export ANTHROPIC_API_KEY=…              # optional: Claude Haiku zoning pass, D1 confirmation, overview
 lectern scan assignment.pdf --local     # or a model served on this machine (Ollama; `ollama pull qwen2.5:7b`), no key, no network
+lectern scan assignment.pdf --distilled # or the built-in classifier distilled from Claude's labels: no key, no network, no model server
 ```
 
 Supported inputs: PDF, HTML, DOCX (own converters), PPTX (MarkItDown), Markdown, text. Python ≥ 3.12. The package is `lectern`; the distribution name on PyPI will be `lectern-cli`.

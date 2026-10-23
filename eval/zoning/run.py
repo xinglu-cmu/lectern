@@ -1,6 +1,6 @@
 """Zoning accuracy suite (DESIGN §9, suite 2): macro-F1 per zone and a confusion matrix.
 
-    python eval/zoning/run.py [--llm] [--local [MODEL]] [--check] [--json results.json] [--md results.md]
+    python eval/zoning/run.py [--llm] [--local [MODEL]] [--distilled] [--check] [--json results.json] [--md results.md]
 
 Labeled documents live in `labeled/`: a document (`name.md`, `.html`, `.pdf`, …)
 next to `name.labels.json`, a list of `{"match": "...", "zone": "..."}` entries.
@@ -46,7 +46,7 @@ def gold_for(segment_text: str, labels: list[dict]) -> str | None:
     return None
 
 
-def evaluate(use_llm: bool, local: bool | str = False) -> dict:
+def evaluate(use_llm: bool, local: bool | str = False, distilled: bool = False) -> dict:
     pairs: list[tuple[str, str]] = []  # (gold, predicted)
     unlabeled: list[dict] = []
     per_doc: dict[str, dict] = {}
@@ -58,7 +58,7 @@ def evaluate(use_llm: bool, local: bool | str = False) -> dict:
         if not labels_path.exists():
             continue
         labels = json.loads(labels_path.read_text())
-        a = analyze(doc, use_llm=use_llm, local=local)
+        a = analyze(doc, use_llm=use_llm, local=local, distilled=distilled)
         doc_pairs = []
         for s in a.segments:
             g = gold_for(s.text, labels)
@@ -111,7 +111,9 @@ def metrics(pairs: list[tuple[str, str]]) -> dict:
     }
 
 
-def to_markdown(heur: dict, llm: dict | None, local: dict | None = None) -> str:
+def to_markdown(
+    heur: dict, llm: dict | None, local: dict | None = None, distilled: dict | None = None
+) -> str:
     lines = [
         "# Zoning accuracy results",
         "",
@@ -131,6 +133,13 @@ def to_markdown(heur: dict, llm: dict | None, local: dict | None = None) -> str:
         lines.append(f"| + local | {local['accuracy']:.2f} | {local['macro_f1']:.2f} |")
         lines.append(
             f"| delta | {local['accuracy'] - heur['accuracy']:+.2f} | {local['macro_f1'] - heur['macro_f1']:+.2f} |"
+        )
+    if distilled:
+        lines.append(
+            f"| + distilled classifier | {distilled['accuracy']:.2f} | {distilled['macro_f1']:.2f} |"
+        )
+        lines.append(
+            f"| delta | {distilled['accuracy'] - heur['accuracy']:+.2f} | {distilled['macro_f1'] - heur['macro_f1']:+.2f} |"
         )
     lines += [
         "",
@@ -177,6 +186,11 @@ def main(argv: list[str] | None = None) -> int:
         help="also run a local model (Ollama)",
     )
     ap.add_argument(
+        "--distilled",
+        action="store_true",
+        help="also run the distilled classifier on the low-confidence segments (offline)",
+    )
+    ap.add_argument(
         "--check", action="store_true", help=f"exit 1 if heuristic macro-F1 < {F1_GATE}"
     )
     ap.add_argument("--json", type=Path, default=RESULTS_DIR / "zoning.json")
@@ -185,14 +199,17 @@ def main(argv: list[str] | None = None) -> int:
     heur = evaluate(use_llm=False)
     llm = evaluate(use_llm=True) if args.llm else None
     local = evaluate(use_llm=True, local=args.local) if args.local else None
+    distilled = evaluate(use_llm=False, distilled=True) if args.distilled else None
     args.json.parent.mkdir(parents=True, exist_ok=True)
     out = {"heuristic": {k: v for k, v in heur.items() if k != "pairs"}}
     if llm:
         out["llm"] = {k: v for k, v in llm.items() if k != "pairs"}
     if local:
         out["local"] = {k: v for k, v in local.items() if k != "pairs"}
+    if distilled:
+        out["distilled"] = {k: v for k, v in distilled.items() if k != "pairs"}
     args.json.write_text(json.dumps(out, indent=2))
-    md = to_markdown(heur, llm, local)
+    md = to_markdown(heur, llm, local, distilled)
     args.md.write_text(md)
     print(md)
     n_docs = len(heur["per_doc"])

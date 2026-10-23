@@ -107,10 +107,15 @@ class LecternTools:
     cached by content hash so the engine (and any model) runs once per file version."""
 
     def __init__(
-        self, use_llm: bool = True, local: bool | str = False, cache_size: int = 32
+        self,
+        use_llm: bool = True,
+        local: bool | str = False,
+        distilled: bool = False,
+        cache_size: int = 32,
     ) -> None:
-        self.use_llm = use_llm
+        self.use_llm = use_llm and not distilled
         self.local = local
+        self.distilled = distilled
         self.cache_size = cache_size
         self._cache: dict[str, tuple[Analysis, Any]] = {}
 
@@ -119,12 +124,15 @@ class LecternTools:
 
     def _analysis(self, path: str) -> tuple[Analysis, Any]:
         p = _resolve(path)
-        key = hashlib.sha256(p.read_bytes()).hexdigest() + f":{self.use_llm}:{self.local}"
+        key = (
+            hashlib.sha256(p.read_bytes()).hexdigest()
+            + f":{self.use_llm}:{self.local}:{self.distilled}"
+        )
         hit = self._cache.get(key)
         if hit is not None:
             return hit
         llm = self._llm()
-        analysis = analyze(p, use_llm=llm is not None, llm=llm)
+        analysis = analyze(p, use_llm=llm is not None, llm=llm, distilled=self.distilled)
         if len(self._cache) >= self.cache_size:
             self._cache.pop(next(iter(self._cache)))
         self._cache[key] = (analysis, llm)
@@ -144,10 +152,10 @@ class LecternTools:
         return render_brief(analysis, out, _zones(keep))
 
 
-def build_server(use_llm: bool = True, local: bool | str = False):
+def build_server(use_llm: bool = True, local: bool | str = False, distilled: bool = False):
     from mcp.server.mcpserver import MCPServer
 
-    tools = LecternTools(use_llm=use_llm, local=local)
+    tools = LecternTools(use_llm=use_llm, local=local, distilled=distilled)
     server = MCPServer(
         name="lectern",
         title="Lectern",
