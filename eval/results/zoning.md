@@ -5,6 +5,12 @@
 | mode | accuracy | macro-F1 |
 |---|---:|---:|
 | heuristic-only | 0.85 | 0.89 |
+| + LLM | 0.86 | 0.87 |
+| delta | +0.01 | -0.02 |
+| + local | 0.81 | 0.82 |
+| delta | -0.04 | -0.07 |
+| + distilled classifier | 0.86 | 0.89 |
+| delta | +0.02 | -0.00 |
 
 Per zone (heuristic-only):
 

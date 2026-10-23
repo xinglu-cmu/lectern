@@ -125,6 +125,7 @@ class Zone(StrEnum):
 class Method(StrEnum):
     heuristic = "heuristic"
     llm = "llm"
+    distilled = "distilled"  # the local classifier trained on Claude's labels (DESIGN §8)
 
 
 class SegmentAnchor(BaseModel):

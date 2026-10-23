@@ -70,10 +70,23 @@ segment id, heading path, text, heuristic zone and confidence, model zone and co
 and `summary.json` / `summary.md`. Documents already in the output are skipped, so a stopped
 run resumes without paying twice.
 
+`train.py` then fits the classifier that ships with the package (`lectern/zoning/distilled.json.gz`,
+[ADR-014](../docs/adr/ADR-014-distilled-classifier.md)): multinomial logistic regression over
+hashed features (words and bigrams of the segment, the heading path, the segment's flags, the
+heuristic zone, confidence bucket and signal names, a few shape counts), fitted by SGD in pure
+Python in a few seconds. It first reports a K-fold cross-validation *by document* (how well the
+model reproduces Claude on documents it has not seen), then refits on everything and saves the
+model with that number in its metadata. The real test is the labeled set:
+`python eval/zoning/run.py --distilled` adds the classifier's column to the zoning table. First
+model (2026-10-23): agreement with Claude on unseen documents 0.61; on the labeled set 0.86 / 0.89
+(accuracy / macro-F1) against 0.85 / 0.89 for the heuristics alone, from 6 changed zones; 119 kB.
+
 ```bash
 python eval/distill/collect.py                  # ~4 MB into results/local/distill/
 python eval/distill/label.py --dry-run          # heuristics only, estimates the model input
 keys ANTHROPIC_API_KEY && python eval/distill/label.py   # the Claude run
+python eval/distill/train.py                    # fit and save lectern/zoning/distilled.json.gz
+python eval/zoning/run.py --distilled           # score it on the labeled set
 ```
 
 **First run, 2026-10-17** (`claude-haiku-4-5`, the definition-plus-examples prompt of ADR-013):

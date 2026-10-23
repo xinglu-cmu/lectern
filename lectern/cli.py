@@ -1,7 +1,7 @@
 """`lectern` — the command-line front door (DESIGN §6).
 
-    lectern scan  DOC [--json] [--no-llm | --local [MODEL]] [--full-text] [--fail-on LEVEL]
-                      [--model MODEL]
+    lectern scan  DOC [--json] [--no-llm | --local [MODEL] | --distilled] [--full-text]
+                      [--fail-on LEVEL] [--model MODEL]
     lectern clean DOC [-o out.md] [--keep Z,Z] [--drop Z,Z] [--interactive]
                       [--no-llm] [--no-report] [--model MODEL]
     lectern brief DOC [-o brief.md] [--keep Z,Z] [--no-llm] [--model MODEL]
@@ -40,6 +40,15 @@ def _local_flag(sub: argparse.ArgumentParser) -> None:
     )
 
 
+def _distilled_flag(sub: argparse.ArgumentParser) -> None:
+    sub.add_argument(
+        "--distilled",
+        action="store_true",
+        help="offline like --no-llm, but the local classifier trained on Claude's labels "
+        "re-zones the segments the heuristics were unsure about (DESIGN §8)",
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="lectern",
@@ -64,6 +73,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan.add_argument("--full-text", action="store_true", help="also print every segment's text")
     _local_flag(scan)
+    _distilled_flag(scan)
     scan.add_argument(
         "--fail-on",
         choices=[s.value for s in Severity],
@@ -88,6 +98,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     clean.add_argument("--no-llm", action="store_true", help="offline: heuristic zoning only")
     _local_flag(clean)
+    _distilled_flag(clean)
     clean.add_argument("--no-report", action="store_true", help="omit the removal report footer")
     clean.add_argument(
         "--model", default=DEFAULT_MODEL, help=f"Claude model (default {DEFAULT_MODEL})"
@@ -102,6 +113,7 @@ def build_parser() -> argparse.ArgumentParser:
     brief.add_argument("--keep", help="zones the clean copy would keep (for the last section)")
     brief.add_argument("--no-llm", action="store_true", help="offline: no model-written half")
     _local_flag(brief)
+    _distilled_flag(brief)
     brief.add_argument(
         "--model", default=DEFAULT_MODEL, help=f"Claude model (default {DEFAULT_MODEL})"
     )
@@ -112,6 +124,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     mcp.add_argument("--no-llm", action="store_true", help="never call a model from the tools")
     _local_flag(mcp)
+    _distilled_flag(mcp)
     mcp.set_defaults(func=cmd_mcp)
 
     serve = sub.add_parser(
@@ -121,6 +134,7 @@ def build_parser() -> argparse.ArgumentParser:
     serve.add_argument("--no-browser", action="store_true", help="don't open the browser")
     serve.add_argument("--no-llm", action="store_true", help="never call a model")
     _local_flag(serve)
+    _distilled_flag(serve)
     serve.add_argument("--model", default=None, help=f"Claude model (default {DEFAULT_MODEL})")
     serve.set_defaults(func=cmd_serve)
     return parser
@@ -131,7 +145,13 @@ def _analyze_or_exit(args: argparse.Namespace):
 
     err = Console(stderr=True)
     try:
-        return analyze(args.doc, use_llm=not args.no_llm, model=args.model, local=args.local)
+        return analyze(
+            args.doc,
+            use_llm=not args.no_llm,
+            model=args.model,
+            local=args.local,
+            distilled=args.distilled,
+        )
     except FileNotFoundError:
         err.print(f"[red]error:[/] file not found: {args.doc}")
     except UnsupportedFormat as exc:
@@ -191,9 +211,15 @@ def cmd_brief(args: argparse.Namespace) -> int:
         raise SystemExit(2)
 
     keep = resolve_selection(_parse_zones(args.keep, usage), None)
-    llm = None if args.no_llm else make_llm(args.model, local=args.local)
+    llm = None if args.no_llm or args.distilled else make_llm(args.model, local=args.local)
     try:
-        analysis = analyze(args.doc, use_llm=not args.no_llm, llm=llm, model=args.model)
+        analysis = analyze(
+            args.doc,
+            use_llm=not args.no_llm,
+            llm=llm,
+            model=args.model,
+            distilled=args.distilled,
+        )
     except FileNotFoundError:
         err.print(f"[red]error:[/] file not found: {args.doc}")
         return 1
@@ -219,7 +245,9 @@ def cmd_mcp(args: argparse.Namespace) -> int:
             "[red]error:[/] the MCP server needs the `mcp` package: pip install 'lectern-cli[mcp]'"
         )
         return 1
-    build_server(use_llm=not args.no_llm, local=args.local).run(transport="stdio")
+    build_server(use_llm=not args.no_llm, local=args.local, distilled=args.distilled).run(
+        transport="stdio"
+    )
     return 0
 
 
@@ -237,6 +265,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
         use_llm=not args.no_llm,
         model=args.model,
         local=args.local,
+        distilled=args.distilled,
     )
     return 0
 

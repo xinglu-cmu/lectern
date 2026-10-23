@@ -76,8 +76,10 @@ def create_app(
     use_llm: bool = True,
     model: str | None = None,
     local: bool | str = False,
+    distilled: bool = False,
 ) -> FastAPI:
     store = store or Store()
+    use_llm = use_llm and not distilled
     pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="lectern-analyze")
     app = FastAPI(title="Lectern", docs_url=None, redoc_url=None)
     app.state.store = store
@@ -115,7 +117,7 @@ def create_app(
         store.set_status(aid, "running")
         try:
             llm = make_llm(model or DEFAULT_MODEL, local=local) if use_llm else None
-            analysis = analyze(path, use_llm=llm is not None, llm=llm)
+            analysis = analyze(path, use_llm=llm is not None, llm=llm, distilled=distilled)
             store.set_result(aid, json.loads(analysis.model_dump_json()), analysis.mode)
         except Exception as exc:  # the file broke a converter: keep the row, say why
             log.exception("analysis %s failed", aid)
@@ -273,13 +275,14 @@ def main(
     use_llm: bool = True,
     model: str | None = None,
     local: bool | str = False,
+    distilled: bool = False,
 ) -> None:
     import threading
     import webbrowser
 
     import uvicorn
 
-    app = create_app(use_llm=use_llm, model=model, local=local)
+    app = create_app(use_llm=use_llm, model=model, local=local, distilled=distilled)
     url = f"http://127.0.0.1:{port}/"
     if open_browser:
         threading.Timer(0.8, lambda: webbrowser.open(url)).start()

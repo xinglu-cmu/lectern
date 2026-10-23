@@ -121,13 +121,13 @@ API sketch: `POST /api/analyses` (multipart file) → 202 + id; `GET /api/analys
 
 | Role | Default | Local alternative |
 |---|---|---|
-| Zoning (low-confidence segments only) | `claude-haiku-4-5`, batched, schema-constrained | local model via Ollama/llama.cpp with the same schema; later the distilled classifier |
+| Zoning (low-confidence segments only) | `claude-haiku-4-5`, batched, schema-constrained | the distilled classifier (`--distilled`, [ADR-014](adr/ADR-014-distilled-classifier.md)): no key, no network, no model server; or a local model via Ollama with the same schema (`--local`) |
 | D1 confirmation | `claude-haiku-4-5` | local model |
 | Overview + brief | `claude-haiku-4-5` | local model |
 
 Haiku: ~$0.02–0.05 per 20-page document, accounted per run and printed. Local: $0, speed depends on the machine; the report names the model. Structured outputs on every call (DESIGN v2 §8 rules unchanged: zone enum without `hidden`, ordinal confidence, batch-local ids checked client-side, failures keep the heuristic result).
 
-**Distillation (G7):** Haiku labels the labeled set and a larger unlabeled corpus of the user's own and public documents → a small classifier (start with a linear model over text features and heading signals; a small fine-tuned encoder if it earns its cost) → evaluated on the held-out labeled set → the heuristic / distilled / Haiku table published. The local model path exists so that "works without a network" also covers the quality upgrade.
+**Distillation (G7):** Haiku labels the labeled set and a larger unlabeled corpus of the user's own and public documents → a small classifier (start with a linear model over text features and heading signals; a small fine-tuned encoder if it earns its cost) → evaluated on the held-out labeled set → the heuristic / distilled / Haiku table published. The local model path exists so that "works without a network" also covers the quality upgrade. *Done in phase 3: the corpus (59 public documents, `eval/distill/`), Claude's labels on every segment, a linear model over hashed text, heading and heuristic-signal features, and the four-column table — [ADR-014](adr/ADR-014-distilled-classifier.md).*
 
 ## 9. Evaluation plan
 
@@ -149,7 +149,7 @@ The dated schedule is dropped; phases ship when done, as fast as they can be bui
 |---|---|---|
 | 1 ✅ | Scaffold, engine, `scan`, detectors H1–H6, `clean`, `--fail-on`, red-team + zoning evals (PRs #49, #50) | Full CLI on an attacked document; numbers in the README |
 | 2 | **Local-first cut** ([ADR-012](adr/ADR-012-local-first.md)): remove the hosted scaffolds, package at repo root; `lectern brief`; `lectern mcp` with the three tools and setup docs; `lectern serve` with report view, selection view, findings review, exports, SQLite history | S4 and S6 demoable; a Claude Code session screens a PDF through MCP |
-| 3 | Local model path (`--local`), distillation + ablation; labeled set to 30 and the zoning gate on; conversion snapshots | S7 demoable; heuristic / local / Haiku table published |
+| 3 ✅ | Local model path (`--local`), distillation + ablation; labeled set to 30 and the zoning gate on; conversion snapshots ([ADR-013](adr/ADR-013-local-model-choice.md), [ADR-014](adr/ADR-014-distilled-classifier.md); PRs #58–#65) | S7 demoable; heuristic / local / distilled / Haiku table published in the README |
 | 4 | Polish: onboarding, sample-document gallery, demo GIF; **PyPI v0.1**; MCP listing; labeled set to 60; **connectors** (export the brief / clean copy to the user's own Google Docs / Drive); **Gateway** (optional module: self-hosted Spring Boot policy enforcement point for organizations — REST + OpenAPI, Python engine as a sidecar, `--fail-on` policy, audit log in Postgres, Testcontainers, OpenTelemetry; [ADR-012](adr/ADR-012-local-first.md) says why Java there) | Installable with one command; ≥ 10 real users; a Gateway demo: a document rejected at the door with an audit record |
 | 5 | Wrap: success measures in the README, launch write-up | Deliverables checklist done |
 
@@ -192,3 +192,4 @@ Lectern works if people and agents use it on their own documents and it catches 
 4. ~~UI stack for `lectern serve`~~ — vanilla HTML/JS served by FastAPI, no build step (phase 2, PR #57).
 5. ~~Local model default~~ — `qwen2.5:7b` through Ollama; `--local` stays opt-in, since the local pass still scores under the heuristics-only floor on the labeled set ([ADR-013](adr/ADR-013-local-model-choice.md) and addenda).
 6. MCP transport: stdio first (Claude Desktop/Code); HTTP transport only if a user asks.
+7. ~~Form of the distilled classifier~~ — a linear model over hashed features, pure Python, 119 kB, trained on Claude's labels over 59 public documents; a fine-tuned encoder only if a larger labeled set shows the linear model short ([ADR-014](adr/ADR-014-distilled-classifier.md)).

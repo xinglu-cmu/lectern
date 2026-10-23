@@ -34,6 +34,7 @@ from lectern.screen.confirm import confirm_directives
 from lectern.screen.hidden import BlockDetector, screen_blocks
 from lectern.segment import segment
 from lectern.zoning import zone_heuristics, zone_with_llm
+from lectern.zoning.distilled import zone_with_classifier
 
 log = logging.getLogger("lectern.pipeline")
 
@@ -45,6 +46,7 @@ def analyze(
     llm: LLM | None = None,
     model: str = DEFAULT_MODEL,
     local: bool | str = False,
+    distilled: bool = False,
     detectors: list[Detector] | None = None,
     block_detectors: list[BlockDetector] | None = None,
 ) -> Analysis:
@@ -53,7 +55,9 @@ def analyze(
     `use_llm=False` is `--no-llm`: heuristics only, no overview, no D1 confirmation.
     With `use_llm=True` and no `llm` given, an Anthropic client is created when
     credentials are present; otherwise the analysis degrades to heuristic-only and
-    says so in `warnings`.
+    says so in `warnings`. `distilled=True` is `--distilled`: offline like `--no-llm`,
+    but the local classifier trained on Claude's labels (DESIGN §8) re-zones the
+    segments the heuristics were unsure about.
     """
     warnings: list[str] = []
     doc = load(path)
@@ -73,6 +77,10 @@ def analyze(
 
     overview: Overview | None = None
     mode = "heuristic-only"
+    if distilled:
+        use_llm = False
+        zone_with_classifier(segments)
+        mode = "distilled"
     if use_llm and llm is None:
         llm = make_llm(model, local=local)
         if llm is None:
@@ -98,6 +106,11 @@ def analyze(
         warnings.append(
             "zoning is heuristic-only; ai_directive detection is regex-only (a document that "
             "quotes injection text will raise warnings)"
+        )
+    elif mode == "distilled":
+        warnings.append(
+            "zoning is heuristics plus the distilled classifier, no model was called: there is "
+            "no overview and ai_directive detection is regex-only"
         )
 
     findings.sort(key=_finding_order)
