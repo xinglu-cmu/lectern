@@ -96,7 +96,19 @@ plausible, low when guessing."""
 def zone_with_llm(segments: list[Segment], llm: LLM, *, title: str | None = None) -> None:
     """Upgrades low-confidence segments in place. Never assigns `hidden`."""
     candidates = [s for s in segments if s.confidence < LLM_THRESHOLD and s.zone is not Zone.hidden]
-    for batch in _batches(candidates):
+    labels = ask_llm(candidates, llm, title=title)
+    _merge(candidates, labels)
+
+
+def ask_llm(
+    segments: list[Segment], llm: LLM, *, title: str | None = None
+) -> dict[str, ZoneLabel | None]:
+    """The model's raw label for each of these segments, keyed by id, nothing merged:
+    `None` when the reply had the id missing or duplicated, absent when its whole batch
+    failed. `zone_with_llm` merges these under the engine's rules; the distillation
+    labeler (eval/distill) records them as they are, for every segment."""
+    labels: dict[str, ZoneLabel | None] = {}
+    for batch in batches(segments):
         result = llm.parse(
             system=SYSTEM,
             user=_render(batch, title),
@@ -105,10 +117,16 @@ def zone_with_llm(segments: list[Segment], llm: LLM, *, title: str | None = None
         )
         if result is None:
             continue
-        _merge(batch, result)
+        counts: dict[str, int] = {}
+        for label in result.labels:
+            counts[label.id] = counts.get(label.id, 0) + 1
+        by_id = {label.id: label for label in result.labels}
+        for seg in batch:
+            labels[seg.id] = by_id[seg.id] if counts.get(seg.id) == 1 else None
+    return labels
 
 
-def _batches(segments: list[Segment]) -> list[list[Segment]]:
+def batches(segments: list[Segment]) -> list[list[Segment]]:
     batches: list[list[Segment]] = []
     current: list[Segment] = []
     tokens = 0
@@ -144,16 +162,14 @@ def _attr(value: str) -> str:
     return value.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;")
 
 
-def _merge(batch: list[Segment], result: ZoneBatch) -> None:
-    counts: dict[str, int] = {}
-    for label in result.labels:
-        counts[label.id] = counts.get(label.id, 0) + 1
-    labels = {label.id: label for label in result.labels}
-    for seg in batch:
-        if counts.get(seg.id) != 1:
+def _merge(candidates: list[Segment], labels: dict[str, ZoneLabel | None]) -> None:
+    for seg in candidates:
+        if seg.id not in labels:
+            continue  # the batch failed: keep the heuristic result, nothing to say
+        label = labels[seg.id]
+        if label is None:
             seg.signals.append("llm:missing_or_duplicate_id")
             continue
-        label = labels[seg.id]
         conf = CONFIDENCE_VALUE[label.confidence]
         if label.zone is LLMZone.unknown:
             seg.signals.append("llm:unknown")
