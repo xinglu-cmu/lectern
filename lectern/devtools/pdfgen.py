@@ -1,7 +1,7 @@
 """A tiny PDF writer for tests: real text with real fonts, sizes, colours and
 positions, no dependency. Enough for pdfplumber to read every word back with
-its style — which is exactly what the PDF converter and, next week, the
-hidden-text detectors need to be tested against. The red-team generator
+its style — which is exactly what the PDF converter and the hidden-text
+detectors need to be tested against. The red-team generator
 (eval/redteam) will grow from the same idea.
 """
 
