@@ -153,7 +153,7 @@ The dated schedule is dropped; phases ship when done, as fast as they can be bui
 | 4 | Polish: onboarding, sample-document gallery, demo GIF; **PyPI v0.1**; MCP listing; labeled set to 60; **connectors** (export the brief / clean copy to the user's own Google Docs / Drive); **Gateway** (optional module: self-hosted Spring Boot policy enforcement point for organizations — REST + OpenAPI, Python engine as a sidecar, `--fail-on` policy, audit log in Postgres, Testcontainers, OpenTelemetry; [ADR-012](adr/ADR-012-local-first.md) says why Java there) | Installable with one command; ≥ 10 real users; a Gateway demo: a document rejected at the door with an audit record |
 | 5 | Wrap: success measures in the README, launch write-up | Deliverables checklist done |
 
-Buffer: growth to ≥ 20 users; "work with the cleaned doc" mode as a phase-2 product idea; and the point where Lectern meets Keel — a locally trained agent (Keel's SFT/GRPO harness) that uses Lectern's tools to screen documents before acting on them, with Lectern's labeled set and brief as training signal.
+Buffer: growth to ≥ 20 users; "work with the cleaned doc" mode as a phase-2 product idea; and a locally trained agent that uses Lectern's tools to screen documents before acting on them, with Lectern's labeled set and brief as training signal.
 
 ## 12. Research hooks
 
