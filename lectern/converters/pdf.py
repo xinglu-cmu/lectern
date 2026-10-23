@@ -6,7 +6,7 @@ has none of them. pdfplumber exposes the same pdfminer character data *with*
 those attributes, so we group words into lines, lines into blocks, and keep a
 `Run` for every stretch of uniform style. Nothing is filtered here — a white 1pt
 word is still a word. Deciding that it is suspicious is the detectors' job
-(week 3); this module only makes sure the evidence survives.
+(`lectern.screen.hidden`); this module only makes sure the evidence survives.
 
 Structure recovered:
 - body font size = the size that carries the most characters;

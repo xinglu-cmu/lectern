@@ -9,7 +9,7 @@ Confidence is not a probability; it is a rank of how much we trust the rule:
 - < 0.7  a guess worth a second opinion — these go to the LLM pass
 
 The rules are written for the documents in DESIGN §3: assignments, syllabi,
-specs, RFPs, papers, web articles. The labeled set (week 3) is what makes them
+specs, RFPs, papers, web articles. The labeled set (eval/zoning) is what makes them
 measurable, and `signals` is what makes their mistakes debuggable.
 """
 

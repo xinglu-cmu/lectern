@@ -1,10 +1,10 @@
 """`screen`: static detectors that run *before* any LLM reads the document.
 
 Ordering is a security property (DESIGN §4): what a detector flags as hidden is
-quarantined and never enters a prompt. In week 2 the suite holds the two
-text-pattern detectors zoning needs anyway — D1 (AI-directed instructions) and
-P1 (AI-use policy statements). The hidden-text detectors H1–H6 join in week 3
-and read the style hints the PDF converter preserved.
+quarantined and never enters a prompt. The suite holds the two text-pattern
+detectors zoning needs anyway — D1 (AI-directed instructions) and P1 (AI-use
+policy statements) — and the hidden-text detectors H1–H6, which read the style
+hints the PDF converter preserved.
 
 Every detector has the same shape: look at the document and its segments,
 return findings. Nothing here changes the document — detect, disclose, and let
