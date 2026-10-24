@@ -1,0 +1,58 @@
+[
+  {
+    "match": "img.shields.io/pypi/v/markitdown.svg",
+    "zone": "background"
+  },
+  {
+    "match": "Markdown is extremely close to plain text",
+    "zone": "background"
+  },
+  {
+    "match": "MarkItDown requires Python 3.10 through 3.14",
+    "zone": "background"
+  },
+  {
+    "match": "To install MarkItDown, use pip:",
+    "zone": "task"
+  },
+  {
+    "match": "markitdown path-to-file.pdf > document.md",
+    "zone": "example"
+  },
+  {
+    "match": "MarkItDown has optional dependencies for activating various file formats",
+    "zone": "background"
+  },
+  {
+    "match": "Content Understanding is ideal when you need capabilities beyond",
+    "zone": "background"
+  },
+  {
+    "match": "| Capability | Built-in converters |",
+    "zone": "example"
+  },
+  {
+    "match": "md = MarkItDown(enable_plugins=False)",
+    "zone": "example"
+  },
+  {
+    "match": "Before starting significant work, please read",
+    "zone": "task"
+  },
+  {
+    "match": "We cannot accept additional applications, services, or servers",
+    "zone": "background"
+  },
+  {
+    "match": "Install `hatch` in your environment and run tests",
+    "zone": "task"
+  },
+  {
+    "match": "it will access resources that the process itself can access",
+    "zone": "background"
+  },
+  {
+    "match": "This project may contain trademarks or logos",
+    "zone": "structure"
+  }
+]

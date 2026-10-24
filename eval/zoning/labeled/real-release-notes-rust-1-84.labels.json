@@ -1,0 +1,38 @@
+[
+  {
+    "match": "Rust Blog - Rust - Install - Learn - Tools",
+    "zone": "structure"
+  },
+  {
+    "match": "## Announcing Rust 1.84.0",
+    "zone": "structure"
+  },
+  {
+    "match": "1.84.0 stabilizes the minimum supported Rust version (MSRV) aware resolver",
+    "zone": "background"
+  },
+  {
+    "match": "This gives library authors more flexibility",
+    "zone": "background"
+  },
+  {
+    "match": "The Rust compiler is in the process of moving to a new implementation for the trait solver",
+    "zone": "background"
+  },
+  {
+    "match": "- Ipv6Addr::is_unique_local",
+    "zone": "structure"
+  },
+  {
+    "match": "Check out everything that changed in",
+    "zone": "structure"
+  },
+  {
+    "match": "Many people came together to create Rust 1.84.0",
+    "zone": "structure"
+  },
+  {
+    "match": "#### Get help! - Documentation",
+    "zone": "structure"
+  }
+]

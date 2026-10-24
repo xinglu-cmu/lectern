@@ -1,0 +1,54 @@
+[
+  {
+    "match": "PEP: 257 Title: Docstring Conventions",
+    "zone": "structure"
+  },
+  {
+    "match": "This PEP documents the semantics and conventions",
+    "zone": "background"
+  },
+  {
+    "match": "The aim of this PEP is to standardize",
+    "zone": "background"
+  },
+  {
+    "match": "A docstring is a string literal that occurs as the first statement",
+    "zone": "background"
+  },
+  {
+    "match": "One-liners are for really obvious cases. They should really fit on one line",
+    "zone": "task"
+  },
+  {
+    "match": "The docstring for a module should generally list the classes",
+    "zone": "task"
+  },
+  {
+    "match": "use the Emacs convention of mentioning the arguments",
+    "zone": "task"
+  },
+  {
+    "match": "Docstring processing tools will strip a uniform amount of indentation",
+    "zone": "background"
+  },
+  {
+    "match": "indent = sys.maxsize",
+    "zone": "example"
+  },
+  {
+    "match": "The docstring in this example contains two newline characters",
+    "zone": "example"
+  },
+  {
+    "match": "References and Footnotes",
+    "zone": "structure"
+  },
+  {
+    "match": "placed in the public domain",
+    "zone": "structure"
+  },
+  {
+    "match": "comes mostly verbatim from",
+    "zone": "structure"
+  }
+]

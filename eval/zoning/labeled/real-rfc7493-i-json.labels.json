@@ -1,0 +1,34 @@
+[
+  {
+    "match": "I-JSON (short for \"Inte",
+    "zone": "background"
+  },
+  {
+    "match": "This document is subject to BCP 78",
+    "zone": "structure"
+  },
+  {
+    "match": "Normative References . . .",
+    "zone": "structure"
+  },
+  {
+    "match": "I-JSON messages MUST be encoded using UTF-8",
+    "zone": "task"
+  },
+  {
+    "match": "it is RECOMMENDED to encode them in JSON string values",
+    "zone": "task"
+  },
+  {
+    "match": "Designers of protocols that use I-JSON messages SHOULD provide a way",
+    "zone": "task"
+  },
+  {
+    "match": "it may prove a more secure basis for Internet protocols",
+    "zone": "background"
+  },
+  {
+    "match": "I-JSON is entirely dependent on the design of JSON, largely due to Douglas Crockford",
+    "zone": "structure"
+  }
+]

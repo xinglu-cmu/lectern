@@ -1,0 +1,38 @@
+[
+  {
+    "match": "title: GitHub security features intro:",
+    "zone": "structure"
+  },
+  {
+    "match": "security features help keep your code and secrets secure",
+    "zone": "background"
+  },
+  {
+    "match": "The following security features are available for you to use, regardless of the",
+    "zone": "background"
+  },
+  {
+    "match": "The dependency graph allows you to explore the ecosystems and packages",
+    "zone": "background"
+  },
+  {
+    "match": "Enforce consistent code standards, security, and compliance across branches",
+    "zone": "background"
+  },
+  {
+    "match": "Push protection proactively scans your code",
+    "zone": "background"
+  },
+  {
+    "match": "Security overview allows you to review the overall security landscape",
+    "zone": "background"
+  },
+  {
+    "match": "Automatically detect security vulnerabilities and coding errors in new or modified code",
+    "zone": "background"
+  },
+  {
+    "match": "## Further reading",
+    "zone": "structure"
+  }
+]

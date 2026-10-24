@@ -1,0 +1,38 @@
+[
+  {
+    "match": "title: Running scripts description:",
+    "zone": "structure"
+  },
+  {
+    "match": "A Python script is a file intended for standalone execution",
+    "zone": "background"
+  },
+  {
+    "match": "If your script has no dependencies, you can execute it with",
+    "zone": "task"
+  },
+  {
+    "match": "Python recently added a standard format for",
+    "zone": "background"
+  },
+  {
+    "match": "# /// script # requires-python",
+    "zone": "example"
+  },
+  {
+    "match": "If you wish to use an alternative",
+    "zone": "task"
+  },
+  {
+    "match": "scripts must be explicitly locked using",
+    "zone": "task"
+  },
+  {
+    "match": "uv allows arbitrary Python versions to be requested on each script invocation",
+    "zone": "background"
+  },
+  {
+    "match": "To learn more about `uv run`, see the",
+    "zone": "structure"
+  }
+]

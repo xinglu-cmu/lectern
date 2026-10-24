@@ -1,0 +1,38 @@
+[
+  {
+    "match": "This is CS50x 2024, an older version of the course",
+    "zone": "structure"
+  },
+  {
+    "match": "Introduction to Computer Science OpenCourseWare",
+    "zone": "structure"
+  },
+  {
+    "match": "- Week 0 Scratch - Week 1 C",
+    "zone": "structure"
+  },
+  {
+    "match": "- Academic Honesty - CS50 Certificate",
+    "zone": "structure"
+  },
+  {
+    "match": "- Communities - Bluesky",
+    "zone": "structure"
+  },
+  {
+    "match": "Collaboration on problem sets is not permitted",
+    "zone": "task"
+  },
+  {
+    "match": "Log into cs50.dev using your GitHub account",
+    "zone": "task"
+  },
+  {
+    "match": "By 2024-12-31T23:59:00-05:00",
+    "zone": "task"
+  },
+  {
+    "match": "To see the manual pages for C functions, visit manual.cs50.io",
+    "zone": "task"
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "match": "If you think you have found a potential security vulnerability in requests, please open a",
+    "zone": "task"
+  },
+  {
+    "match": "This following information discusses the process the requests project follows",
+    "zone": "background"
+  },
+  {
+    "match": "one of the project members will respond to you within two days",
+    "zone": "background"
+  },
+  {
+    "match": "we will reach out to our major downstream packagers",
+    "zone": "background"
+  }
+]

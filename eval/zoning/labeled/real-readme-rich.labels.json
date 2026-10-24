@@ -1,0 +1,38 @@
+[
+  {
+    "match": "img.shields.io/pypi/pyversions/rich",
+    "zone": "structure"
+  },
+  {
+    "match": "Português brasileiro readme",
+    "zone": "structure"
+  },
+  {
+    "match": "Rich works with Linux, macOS and Windows",
+    "zone": "background"
+  },
+  {
+    "match": "Install with `pip` or your favorite PyPI package manager",
+    "zone": "task"
+  },
+  {
+    "match": ">>> from rich import pretty",
+    "zone": "example"
+  },
+  {
+    "match": "Rich contains a number of builtin",
+    "zone": "background"
+  },
+  {
+    "match": "table = Table(show_header=True",
+    "zone": "example"
+  },
+  {
+    "match": "The following screenshot is the output from the",
+    "zone": "example"
+  },
+  {
+    "match": "See also [Rich CLI]",
+    "zone": "structure"
+  }
+]

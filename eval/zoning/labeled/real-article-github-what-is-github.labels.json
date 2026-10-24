@@ -1,0 +1,26 @@
+[
+  {
+    "match": "title: What is GitHub?",
+    "zone": "structure"
+  },
+  {
+    "match": "is a platform for building software",
+    "zone": "background"
+  },
+  {
+    "match": "The software development life cycle describes the stages",
+    "zone": "background"
+  },
+  {
+    "match": "Git is a version control system that tracks changes",
+    "zone": "background"
+  },
+  {
+    "match": "is used by students, developers, project managers",
+    "zone": "background"
+  },
+  {
+    "match": "we recommend working through the articles",
+    "zone": "task"
+  }
+]

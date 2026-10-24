@@ -1,0 +1,30 @@
+[
+  {
+    "match": "title: GitHub Community Guidelines redirect_from",
+    "zone": "structure"
+  },
+  {
+    "match": "We encourage our community members to communicate expectations clearly",
+    "zone": "background"
+  },
+  {
+    "match": "The primary purpose of the GitHub community is to collaborate on software projects",
+    "zone": "background"
+  },
+  {
+    "match": "GitHub is a global community with people from a wide variety of backgrounds",
+    "zone": "task"
+  },
+  {
+    "match": "We rely on reports from the community, as well as proactive detection",
+    "zone": "background"
+  },
+  {
+    "match": "If your content or account has been disabled or restricted and you seek reinstatement",
+    "zone": "task"
+  },
+  {
+    "match": "We dedicate these Community Guidelines to the public domain",
+    "zone": "structure"
+  }
+]

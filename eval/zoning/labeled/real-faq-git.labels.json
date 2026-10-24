@@ -1,0 +1,58 @@
+[
+  {
+    "match": "- About - Trademark - Learn - Book - Cheat Sheet",
+    "zone": "structure"
+  },
+  {
+    "match": "### Basic Snapshotting - add - status",
+    "zone": "structure"
+  },
+  {
+    "match": "### Guides - gitattributes",
+    "zone": "structure"
+  },
+  {
+    "match": "gitfaq - Frequently asked questions about using Git",
+    "zone": "structure"
+  },
+  {
+    "match": "The examples in this FAQ assume a standard POSIX shell",
+    "zone": "background"
+  },
+  {
+    "match": "You should put your personal name, generally a form using a given name and family name",
+    "zone": "task"
+  },
+  {
+    "match": "increasing this value will increase the memory used",
+    "zone": "background"
+  },
+  {
+    "match": "The easiest way to do this is to use a credential helper",
+    "zone": "task"
+  },
+  {
+    "match": "$ git config credential.helper",
+    "zone": "example"
+  },
+  {
+    "match": "First, decide whether you want to do this at all",
+    "zone": "task"
+  },
+  {
+    "match": "You can make the appropriate change to your working tree, run git add",
+    "zone": "task"
+  },
+  {
+    "match": "there are a variety of problems that can occur when using squash merges",
+    "zone": "background"
+  },
+  {
+    "match": "the changes from one side are applied as a regular commit to the other side",
+    "zone": "background"
+  },
+  {
+    "match": "Patches, suggestions, and comments are welcome",
+    "zone": "structure"
+  }
+]

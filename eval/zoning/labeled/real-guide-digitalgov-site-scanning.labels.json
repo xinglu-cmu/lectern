@@ -1,0 +1,34 @@
+[
+  {
+    "match": "Official websites use .gov",
+    "zone": "structure"
+  },
+  {
+    "match": "Guidance on building better digital services in government Menu",
+    "zone": "structure"
+  },
+  {
+    "match": "#### Sections Overview Access the data",
+    "zone": "structure"
+  },
+  {
+    "match": "The Site Scanning Program automates a wide range of scans",
+    "zone": "background"
+  },
+  {
+    "match": "All scan data can be downloaded directly as a CSV or JSON file",
+    "zone": "background"
+  },
+  {
+    "match": "Much deeper program detail can be found in the program's documentation hub",
+    "zone": "background"
+  },
+  {
+    "match": "Questions? Email the Site Scanning team",
+    "zone": "structure"
+  },
+  {
+    "match": "Return to top ### Learn - Join communities",
+    "zone": "structure"
+  }
+]

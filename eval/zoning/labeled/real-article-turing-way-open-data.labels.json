@@ -1,0 +1,30 @@
+[
+  {
+    "match": "(rr-open-data)=",
+    "zone": "structure"
+  },
+  {
+    "match": "The world is witnessing a significant global transformation",
+    "zone": "background"
+  },
+  {
+    "match": "Funders are starting to require researchers",
+    "zone": "background"
+  },
+  {
+    "match": "Many academics find sharing data difficult",
+    "zone": "background"
+  },
+  {
+    "match": "Many fields of research involve working with sensitive personal data",
+    "zone": "background"
+  },
+  {
+    "match": "consent forms must cover sharing this data",
+    "zone": "background"
+  },
+  {
+    "match": "companies are understandably unwilling to publish",
+    "zone": "background"
+  }
+]

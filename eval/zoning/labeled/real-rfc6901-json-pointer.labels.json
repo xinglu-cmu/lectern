@@ -1,0 +1,30 @@
+[
+  {
+    "match": "This document is subject to BCP 78",
+    "zone": "structure"
+  },
+  {
+    "match": "This specification defines JSON Pointer, a string syntax for identifying",
+    "zone": "background"
+  },
+  {
+    "match": "Evaluation of a JSON Pointer begins with a reference to the root value",
+    "zone": "task"
+  },
+  {
+    "match": "making the new referenced value the array element with the zero-based",
+    "zone": "task"
+  },
+  {
+    "match": "For example, given the JSON document",
+    "zone": "example"
+  },
+  {
+    "match": "#/a~1b 1",
+    "zone": "example"
+  },
+  {
+    "match": "10. References 10.1. Normative References",
+    "zone": "structure"
+  }
+]

@@ -1,0 +1,54 @@
+[
+  {
+    "match": "Network Working Group G. Klyne",
+    "zone": "structure"
+  },
+  {
+    "match": "Readability .....",
+    "zone": "structure"
+  },
+  {
+    "match": "This document includes an Internet profile of the ISO 8601",
+    "zone": "background"
+  },
+  {
+    "match": "A suffix which, when applied to a time, denotes a UTC offset of 00:00",
+    "zone": "background"
+  },
+  {
+    "match": "all dates and times used in Internet protocols MUST be fully qualified",
+    "zone": "task"
+  },
+  {
+    "match": "numeric offsets represent only time zones that differ from UTC by an integral number of minutes",
+    "zone": "background"
+  },
+  {
+    "match": "This host MUST correct unqualified local times",
+    "zone": "task"
+  },
+  {
+    "match": "Human readability has proved to be a valuable feature of Internet protocols",
+    "zone": "background"
+  },
+  {
+    "match": "partial-time = time-hour",
+    "zone": "example"
+  },
+  {
+    "match": "Month Number Month/Year Maximum value of date-mday",
+    "zone": "example"
+  },
+  {
+    "match": "this profile of ISO 8601 only allows values between",
+    "zone": "task"
+  },
+  {
+    "match": "[ABNF] Crocker, D. and P. Overell",
+    "zone": "structure"
+  },
+  {
+    "match": "some sites may wish to emit times in UTC",
+    "zone": "background"
+  }
+]

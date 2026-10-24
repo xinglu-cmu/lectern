@@ -1,0 +1,26 @@
+[
+  {
+    "match": "PEP: 20 Title: The Zen of Python",
+    "zone": "structure"
+  },
+  {
+    "match": "succinctly channels the BDFL's guiding principles",
+    "zone": "background"
+  },
+  {
+    "match": "Beautiful is better than ugly",
+    "zone": "background"
+  },
+  {
+    "match": ">>> import this",
+    "zone": "example"
+  },
+  {
+    "match": "Originally posted to comp.lang.python",
+    "zone": "structure"
+  },
+  {
+    "match": "This document has been placed in the public domain",
+    "zone": "structure"
+  }
+]
