@@ -1,0 +1,50 @@
+[
+  {
+    "match": "### Browse Course Material - Syllabus - Calendar",
+    "zone": "structure"
+  },
+  {
+    "match": "## Course Info ### Instructor - Prof. Gilbert Strang",
+    "zone": "structure"
+  },
+  {
+    "match": "### Learning Resource Types grading Exam Solutions",
+    "zone": "structure"
+  },
+  {
+    "match": "# Linear Algebra Menu More Info",
+    "zone": "structure"
+  },
+  {
+    "match": "Lectures: 3 sessions / week, 1 hour / session",
+    "zone": "background"
+  },
+  {
+    "match": "### Prerequisites Multivariable Calculus (18.02)",
+    "zone": "background"
+  },
+  {
+    "match": "The readings are assigned in",
+    "zone": "task"
+  },
+  {
+    "match": "The goals for 18.06 are using matrices and also understanding them",
+    "zone": "background"
+  },
+  {
+    "match": "The homeworks are essential in learning linear algebra",
+    "zone": "task"
+  },
+  {
+    "match": "There will be three one-hour exams at class times",
+    "zone": "task"
+  },
+  {
+    "match": "Some homework problems will require you to use MATLAB",
+    "zone": "task"
+  },
+  {
+    "match": "Please be advised that external sites may have terms and conditions",
+    "zone": "structure"
+  }
+]

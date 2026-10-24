@@ -1,0 +1,42 @@
+[
+  {
+    "match": "Skip to main content",
+    "zone": "structure"
+  },
+  {
+    "match": "Navigation menu",
+    "zone": "structure"
+  },
+  {
+    "match": "- Home - Crime, justice and law - Legal aid News story",
+    "zone": "structure"
+  },
+  {
+    "match": "Applications are now open for training providers to submit an inquest training course to us for approval",
+    "zone": "task"
+  },
+  {
+    "match": "From: Legal Aid Agency Published:",
+    "zone": "structure"
+  },
+  {
+    "match": "We are opening applications now so that training course providers can submit",
+    "zone": "background"
+  },
+  {
+    "match": "Read the Approved training course for inquests guidance to find out how to submit an application",
+    "zone": "task"
+  },
+  {
+    "match": "## Share this page The following links open in a new tab",
+    "zone": "structure"
+  },
+  {
+    "match": "Please fill in this survey",
+    "zone": "structure"
+  },
+  {
+    "match": "## Services and information - Benefits",
+    "zone": "structure"
+  }
+]

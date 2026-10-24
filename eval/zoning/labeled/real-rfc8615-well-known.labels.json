@@ -1,0 +1,46 @@
+[
+  {
+    "match": "This document is subject to BCP 78",
+    "zone": "structure"
+  },
+  {
+    "match": "6.2. Informative References",
+    "zone": "structure"
+  },
+  {
+    "match": "one solution is to designate a",
+    "zone": "background"
+  },
+  {
+    "match": "For example, if an application registers the name 'example'",
+    "zone": "example"
+  },
+  {
+    "match": "At a minimum, a registration will reference a specification",
+    "zone": "task"
+  },
+  {
+    "match": "Provisional entries can be removed by the experts",
+    "zone": "background"
+  },
+  {
+    "match": "contains some examples of potential security considerations",
+    "zone": "background"
+  },
+  {
+    "match": "This memo does not specify the scope of applicability",
+    "zone": "background"
+  },
+  {
+    "match": "Applications using well-known locations should consider that some server administrators",
+    "zone": "task"
+  },
+  {
+    "match": "[RFC3986] Berners-Lee, T., Fielding, R.",
+    "zone": "structure"
+  },
+  {
+    "match": "[RFC7231] Fielding, R., Ed. and J. Reschke",
+    "zone": "structure"
+  }
+]

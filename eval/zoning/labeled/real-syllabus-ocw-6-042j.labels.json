@@ -1,0 +1,34 @@
+[
+  {
+    "match": "### Browse Course Material - Syllabus - Calendar - Readings",
+    "zone": "structure"
+  },
+  {
+    "match": "## Course Info ### Instructors - Prof. Tom Leighton",
+    "zone": "structure"
+  },
+  {
+    "match": "The only prerequisite is 18.01",
+    "zone": "background"
+  },
+  {
+    "match": "Lectures: 2 sessions / week, 1.5 hours / session",
+    "zone": "background"
+  },
+  {
+    "match": "The text is Mathematics for Computer Science",
+    "zone": "background"
+  },
+  {
+    "match": "There are 12 problem sets. Typically, a problem set is due a week after it is assigned",
+    "zone": "task"
+  },
+  {
+    "match": "You are welcome to work with other students on homework, but your writeup must be entirely your own",
+    "zone": "task"
+  },
+  {
+    "match": "Please be advised that external sites may have terms",
+    "zone": "structure"
+  }
+]

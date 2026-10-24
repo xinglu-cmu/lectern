@@ -1,0 +1,34 @@
+[
+  {
+    "match": "img.shields.io/github/actions/workflow/status/pydantic",
+    "zone": "background"
+  },
+  {
+    "match": "Logfire is an observability and evaluation platform",
+    "zone": "background"
+  },
+  {
+    "match": "Pydantic V2 is a ground-up rewrite",
+    "zone": "background"
+  },
+  {
+    "match": "pydantic.dev/docs/validation/latest/get-started/) for more details",
+    "zone": "structure"
+  },
+  {
+    "match": "Install using `pip install -U pydantic`",
+    "zone": "task"
+  },
+  {
+    "match": "class User(BaseModel):",
+    "zone": "example"
+  },
+  {
+    "match": "For guidance on setting up a development environment",
+    "zone": "structure"
+  },
+  {
+    "match": "See our [security policy]",
+    "zone": "structure"
+  }
+]

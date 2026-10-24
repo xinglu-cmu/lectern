@@ -4,6 +4,8 @@
 
 Labeled documents live in `labeled/`: a document (`name.md`, `.html`, `.pdf`, …)
 next to `name.labels.json`, a list of `{"match": "...", "zone": "..."}` entries.
+Documents whose stem starts with `real-` are real public documents (sources in
+`labeled/SOURCES.md`); the rest are authored. Every table is also split by that group.
 `match` is a distinctive phrase from the segment; a produced segment takes the
 gold zone of the first entry whose phrase it contains. Segments no entry matches
 are left out of the score and listed, so the labels stay robust to changes in
@@ -30,12 +32,17 @@ HERE = Path(__file__).parent
 LABELED = HERE / "labeled"
 RESULTS_DIR = HERE.parent / "results"
 ZONES = [z.value for z in Zone]
+GROUPS = ("authored", "real")
 F1_GATE = 0.75
 GATE_MIN_DOCS = 30  # the gate arms itself once the labeled set is big enough to trust
 
 
 def _norm(text: str) -> str:
     return " ".join(text.split()).lower()
+
+
+def group_of(doc: Path) -> str:
+    return "real" if doc.stem.startswith("real-") else "authored"
 
 
 def gold_for(segment_text: str, labels: list[dict]) -> str | None:
@@ -48,6 +55,7 @@ def gold_for(segment_text: str, labels: list[dict]) -> str | None:
 
 def evaluate(use_llm: bool, local: bool | str = False, distilled: bool = False) -> dict:
     pairs: list[tuple[str, str]] = []  # (gold, predicted)
+    by_group: dict[str, list[tuple[str, str]]] = {g: [] for g in GROUPS}
     unlabeled: list[dict] = []
     per_doc: dict[str, dict] = {}
     docs = sorted(
@@ -69,7 +77,9 @@ def evaluate(use_llm: bool, local: bool | str = False, distilled: bool = False) 
                 continue
             doc_pairs.append((g, s.zone.value))
         pairs += doc_pairs
+        by_group[group_of(doc)] += doc_pairs
         per_doc[doc.name] = {
+            "group": group_of(doc),
             "segments": len(a.segments),
             "labeled": len(doc_pairs),
             "accuracy": sum(1 for g, p in doc_pairs if g == p) / len(doc_pairs)
@@ -77,7 +87,17 @@ def evaluate(use_llm: bool, local: bool | str = False, distilled: bool = False) 
             else None,
             "mode": a.mode,
         }
-    return {"pairs": pairs, "unlabeled": unlabeled, "per_doc": per_doc, **metrics(pairs)}
+    groups = {
+        g: {"documents": sum(1 for d in per_doc.values() if d["group"] == g), **metrics(p)}
+        for g, p in by_group.items()
+    }
+    return {
+        "pairs": pairs,
+        "unlabeled": unlabeled,
+        "per_doc": per_doc,
+        "groups": groups,
+        **metrics(pairs),
+    }
 
 
 def metrics(pairs: list[tuple[str, str]]) -> dict:
@@ -141,6 +161,25 @@ def to_markdown(
         lines.append(
             f"| delta | {distilled['accuracy'] - heur['accuracy']:+.2f} | {distilled['macro_f1'] - heur['macro_f1']:+.2f} |"
         )
+    lines += ["", "By document group (accuracy / macro-F1):", ""]
+    cols = [(g, heur["groups"][g]["documents"], heur["groups"][g]["n"]) for g in GROUPS]
+    lines.append("| mode | " + " | ".join(f"{g} ({d} docs, {n} segs)" for g, d, n in cols) + " |")
+    lines.append("|---|" + "---:|" * len(cols))
+    for label, res in [
+        ("heuristic-only", heur),
+        ("+ LLM", llm),
+        ("+ local", local),
+        ("+ distilled classifier", distilled),
+    ]:
+        if res:
+            lines.append(
+                f"| {label} | "
+                + " | ".join(
+                    f"{res['groups'][g]['accuracy']:.2f} / {res['groups'][g]['macro_f1']:.2f}"
+                    for g, _, _ in cols
+                )
+                + " |"
+            )
     lines += [
         "",
         "Per zone (heuristic-only):",

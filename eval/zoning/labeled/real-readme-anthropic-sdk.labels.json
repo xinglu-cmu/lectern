@@ -1,0 +1,34 @@
+[
+  {
+    "match": "provides access to the",
+    "zone": "background"
+  },
+  {
+    "match": "pip install anthropic",
+    "zone": "task"
+  },
+  {
+    "match": "api_key=os.environ.get(\"ANTHROPIC_API_KEY\")",
+    "zone": "example"
+  },
+  {
+    "match": "The SDK reports each API call as an OpenTelemetry span",
+    "zone": "background"
+  },
+  {
+    "match": "A client that is given no `open_telemetry` option reads these environment variables",
+    "zone": "background"
+  },
+  {
+    "match": "Python 3.10+",
+    "zone": "background"
+  },
+  {
+    "match": "See [CONTRIBUTING.md]",
+    "zone": "structure"
+  },
+  {
+    "match": "This project is licensed under the Apache License",
+    "zone": "structure"
+  }
+]

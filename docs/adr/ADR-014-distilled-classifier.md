@@ -49,3 +49,24 @@ What the classifier actually did on the labeled set: of 184 segments, 39 were un
 - The README metrics table carries the four-column ablation; `eval/zoning/run.py --distilled` adds the column.
 - Retraining is `python eval/distill/train.py` after a new `label.py` run; the model's metadata records the labels' hash, the teacher, the counts and the cross-validation score.
 - Open: the labeled set should grow with real, phrase-labeled documents (phase 4, target 60). That is what will say whether Claude or the heuristics are right where they disagree on real text, and whether the linear model's 0.61 ceiling costs anything a user would notice.
+
+## Addendum, 2026-10-23 (later the same day): the labeled set gets 38 real documents
+
+The open question above was answered the only way it could be: by labeling real documents by hand. Labeled set v0.4 adds 38 redistributable public documents (`eval/zoning/labeled/real-*`, sources and licences in `labeled/SOURCES.md`; none of them in the distillation corpus), 371 gold segments labeled by phrase under the ADR-013 rule, and `run.py` now reports every table split by group.
+
+| zoning | authored (30 docs, 184 segs) | real (38 docs, 371 segs) | all (68 docs, 555 segs) |
+|---|---:|---:|---:|
+| heuristics, before the v0.4 rules | 0.85 / 0.89 | 0.51 / 0.53 | 0.62 / 0.69 |
+| heuristics, with them | 0.85 / 0.88 | 0.63 / 0.62 | 0.70 / 0.75 |
+| + distilled classifier | 0.86 / 0.88 | 0.72 / 0.67 | 0.77 / 0.78 |
+| + local `qwen2.5:7b` | 0.80 / 0.82 | 0.68 / 0.63 | 0.72 / 0.72 |
+| + Claude Haiku | 0.86 / 0.87 | 0.81 / 0.77 | 0.82 / 0.81 |
+
+(accuracy / macro-F1; same harness.)
+
+**What the real documents say.**
+
+1. **The authored set flattered everyone.** On real text the heuristics fell from 0.89 to 0.53 macro-F1 before any fix. Half of that was page furniture the authored documents never had: YAML front matter, PEP and RFC headers, navigation and breadcrumb lists, link lists, reference lists, badges, IETF boilerplate, "Documentation" and "See also" pointer sections, GOV.UK and Wikipedia chrome. Those became rules with unit tests (`heuristics.py`: `metadata_block`, `nav_list`, `link_list`, `references`, `badges`, `heading:pointer`, `heading:site_chrome`, `instructions+code`, `fenced_code`, `grammar`) and lifted the real group to 0.62 without moving the authored one.
+2. **The distilled classifier helps most where the heuristics are weakest.** It adds +0.01 on the authored group and +0.09 accuracy / +0.05 F1 on the real one, because real documents leave many more segments under the 0.7 bar for it to speak on. That is the first evidence that Claude's labels carry something the rules do not, and that the classifier transfers it.
+3. **What is left is the boundary, not the furniture.** The remaining real-document misses are background↔task on RFC *must* sentences, FAQ answers and wiki prose, and segments that explain and then show code. Those are what the model passes are for, and now there is a number for each: on the real group Claude lifts the heuristics from 0.63 / 0.62 to 0.81 / 0.77, the distilled classifier to 0.72 / 0.67, the local 7B model only to 0.68 / 0.63. **On real documents Claude is clearly the best zoner and the heuristics-only floor is not good enough**; the authored set had hidden both facts. The distilled classifier recovers half of Claude's gain for nothing, which is what it was built for; the local LLM recovers a quarter at nine seconds a document. This reverses ADR-013's "level with the heuristics" reading for real text, and it argues for growing the real corpus (and retraining the classifier on more of Claude's labels) rather than for more hand-written rules.
+4. **The gate.** `--check` still applies macro-F1 ≥ 0.75 to the heuristics on the whole set, which they now clear by a hair (0.754). It is a floor against regressions, not a target; the real-group number is the one to watch.

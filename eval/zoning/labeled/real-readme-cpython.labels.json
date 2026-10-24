@@ -1,0 +1,34 @@
+[
+  {
+    "match": "CPython build status on GitHub Actions",
+    "zone": "structure"
+  },
+  {
+    "match": "- Website: https://www.python.org - Source code:",
+    "zone": "structure"
+  },
+  {
+    "match": "./configure make make test sudo make install",
+    "zone": "task"
+  },
+  {
+    "match": "To get an optimized build of Python, run",
+    "zone": "task"
+  },
+  {
+    "match": "LTO takes advantage of the ability of recent compiler toolchains",
+    "zone": "background"
+  },
+  {
+    "match": "To test the interpreter, type ``make test`` in the top-level directory",
+    "zone": "task"
+  },
+  {
+    "match": "if you intend to install multiple versions of Python using the same installation prefix",
+    "zone": "task"
+  },
+  {
+    "match": "Copyright © 2001 Python Software Foundation",
+    "zone": "structure"
+  }
+]

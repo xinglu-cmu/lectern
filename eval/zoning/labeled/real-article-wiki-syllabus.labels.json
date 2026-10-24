@@ -1,0 +1,38 @@
+[
+  {
+    "match": "Jump to content",
+    "zone": "structure"
+  },
+  {
+    "match": "Main menu Main menu move to sidebar",
+    "zone": "structure"
+  },
+  {
+    "match": "Contents move to sidebar hide",
+    "zone": "structure"
+  },
+  {
+    "match": "is a document that communicates information about an academic course",
+    "zone": "background"
+  },
+  {
+    "match": "the word syllabus derives from modern Latin",
+    "zone": "background"
+  },
+  {
+    "match": "Slattery & Carlson describe the syllabus as a",
+    "zone": "background"
+  },
+  {
+    "match": "Look up syllabus in Wiktionary",
+    "zone": "structure"
+  },
+  {
+    "match": "Oxford English Dictionary (online ed.)",
+    "zone": "structure"
+  },
+  {
+    "match": "This page was last edited on",
+    "zone": "structure"
+  }
+]

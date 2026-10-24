@@ -158,3 +158,99 @@ def test_tables_are_content_under_schedule_headings_and_structure_as_revision_hi
     assert _zone(table, path=["Results"], flags=["code_heavy"]).zone is Zone.example
     rev = "| Revision | Date | Change |\n|---|---|---|\n| 1 | 2022-05-10 | First issue |"
     assert _zone(rev, flags=["code_heavy"]).zone is Zone.structure
+
+
+# --- rules added with the real documents of labeled set v0.4 ---------------------------
+
+
+def test_front_matter_and_metadata_headers_are_structure():
+    fm = _zone("---\ntitle: Running scripts\ndescription: A guide to uv.\n---")
+    assert fm.zone is Zone.structure and any(s.startswith("metadata_block") for s in fm.signals)
+    pep = _zone(
+        "PEP: 20\nTitle: The Zen of Python\nAuthor: Tim Peters\nStatus: Active\nType: Informational"
+    )
+    assert pep.zone is Zone.structure
+    # a key-value block deep in a document is not a masthead
+    later = _seg("Name: cache\nSize: 64 MB\nMode: lru\nThe cache evicts the oldest entry first.")
+    later.seq = 7
+    zone_heuristics([later], [])
+    assert later.zone is not Zone.structure or "metadata_block" not in " ".join(later.signals)
+
+
+def test_navigation_and_link_lists_are_structure():
+    nav = _zone(
+        "- Home - Monetary Policy - Supervision & Regulation - Financial Stability - Data - Careers"
+    )
+    assert nav.zone is Zone.structure and any(s.startswith("nav_list") for s in nav.signals)
+    links = _zone(
+        "* [Announcing Rust 1.84.0](https://blog.rust-lang.org/a)\n"
+        "* [Test infra report](https://blog.rust-lang.org/b)\n"
+        "* [Rust Global 2025](https://foundation.rust-lang.org/c)"
+    )
+    assert links.zone is Zone.structure
+    assert any(s.startswith(("link_list", "link_line")) for s in links.signals)
+    # a short task list with imperatives is not navigation
+    todo = _zone("- Implement the parser\n- Write the tests\n- Submit the report")
+    assert todo.zone is not Zone.structure
+
+
+def test_reference_lists_badges_and_ietf_boilerplate_are_structure():
+    refs = _zone(
+        '[RFC2119] Bradner, S., "Key words for use in RFCs", BCP 14, RFC 2119, March 1997.\n'
+        '[RFC3629] Yergeau, F., "UTF-8, a transformation format of ISO 10646", RFC 3629.\n'
+        '[RFC7159] Bray, T., "The JSON Data Interchange Format", RFC 7159, March 2014.'
+    )
+    assert refs.zone is Zone.structure and any(s.startswith("references") for s in refs.signals)
+    badges = _zone(
+        "# rich\n[![PyPI](https://img.shields.io/pypi/v/rich.svg)](https://pypi.org/project/rich/) "
+        "[![Downloads](https://img.shields.io/pypi/dm/rich)](https://pepy.tech/project/rich)"
+    )
+    assert badges.zone is Zone.structure and "badges" in badges.signals
+    legal = _zone(
+        "This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to "
+        "IETF Documents in effect on the date of publication of this document."
+    )
+    assert legal.zone is Zone.structure
+
+
+def test_pointer_sections_are_structure_unless_they_instruct():
+    doc = _zone(
+        "## Documentation\nProject documentation is available at https://example.org/docs.",
+        path=["Documentation"],
+    )
+    assert doc.zone is Zone.structure and "heading:pointer" in doc.signals
+    contrib = _zone(
+        "## Contributing\nOpen an issue before a large change. Run the tests with `pytest`.",
+        path=["Contributing"],
+    )
+    assert contrib.zone is Zone.task
+    chrome = _zone("## Share this page\nShare on Facebook. Share on X.", path=["Share this page"])
+    assert chrome.zone is Zone.structure
+
+
+def test_instructions_with_a_command_are_task_but_mostly_code_is_example():
+    install = _zone(
+        "## Installing rustup\nOpen a terminal and enter the following command:\n\n"
+        "```console\n$ curl --proto '=https' https://sh.rustup.rs -sSf | sh\n```"
+    )
+    assert install.zone is Zone.task and "instructions+code" in install.signals
+    code = _zone(
+        "```python\ndef bubble_sort(arr):\n    for i in range(len(arr)):\n        pass\n"
+        "    return arr\n```\n\nNote that the loop is quadratic."
+    )
+    assert code.zone is Zone.example and any(s.startswith("fenced_code") for s in code.signals)
+    grammar = _zone(
+        "date-fullyear = 4DIGIT\ndate-month = 2DIGIT ; 01-12\ndate-mday = 2DIGIT\n"
+        'time-hour = 2DIGIT ; 00-23\nfull-date = date-fullyear "-" date-month "-" date-mday'
+    )
+    assert grammar.zone is Zone.example and any(s.startswith("grammar") for s in grammar.signals)
+
+
+def test_templating_markup_and_inline_code_are_not_code_lines():
+    seg = _zone(
+        "### Push protection\nPush protection scans your code for "
+        "{% data variables.product.prodname_secret_scanning %} "
+        "alerts. Like `open()` or `requests.get()`, it runs with the process's privileges. "
+        "For more information, see [AUTOTITLE](/code-security/push-protection)."
+    )
+    assert seg.zone is not Zone.example

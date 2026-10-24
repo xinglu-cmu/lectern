@@ -1,0 +1,46 @@
+[
+  {
+    "match": "Skip to main content",
+    "zone": "structure"
+  },
+  {
+    "match": "Navigation menu",
+    "zone": "structure"
+  },
+  {
+    "match": "- Home - Government - Government efficiency, transparency and accountability Guidance",
+    "zone": "structure"
+  },
+  {
+    "match": "Guidance for public sector organisations on how to use data and data-driven technologies responsibly",
+    "zone": "background"
+  },
+  {
+    "match": "From: Government Digital Service Published: 13 June 2018",
+    "zone": "structure"
+  },
+  {
+    "match": "## Documents ### Data and AI Ethics Framework HTML",
+    "zone": "structure"
+  },
+  {
+    "match": "This file is in an OpenDocument format",
+    "zone": "structure"
+  },
+  {
+    "match": "The Data and AI Ethics Framework sets out principles and activities",
+    "zone": "background"
+  },
+  {
+    "match": "Get emails about this page Print this page",
+    "zone": "structure"
+  },
+  {
+    "match": "Please fill in this survey",
+    "zone": "structure"
+  },
+  {
+    "match": "## Services and information - Benefits",
+    "zone": "structure"
+  }
+]

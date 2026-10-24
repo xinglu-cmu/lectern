@@ -1,0 +1,46 @@
+[
+  {
+    "match": "layout: lecture title:",
+    "zone": "structure"
+  },
+  {
+    "match": "The most effective debugging tool is still careful thought",
+    "zone": "background"
+  },
+  {
+    "match": "One of my favorite tips for making logs more readable is to color code them",
+    "zone": "background"
+  },
+  {
+    "match": "you will most probably run into dependencies that run as separate programs",
+    "zone": "background"
+  },
+  {
+    "match": "def bubble_sort(arr):",
+    "zone": "example"
+  },
+  {
+    "match": "$ pyflakes foobar.py",
+    "zone": "example"
+  },
+  {
+    "match": "A complementary tool to stylistic linting are code formatters",
+    "zone": "background"
+  },
+  {
+    "match": "Algorithms classes often teach big",
+    "zone": "background"
+  },
+  {
+    "match": "There are two main types of CPU profilers",
+    "zone": "background"
+  },
+  {
+    "match": "$ kernprof -l -v a.py",
+    "zone": "example"
+  },
+  {
+    "match": "Programs often run slowly when they are resource cons",
+    "zone": "background"
+  }
+]

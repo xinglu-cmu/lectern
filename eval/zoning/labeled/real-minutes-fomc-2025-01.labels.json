@@ -1,0 +1,58 @@
+[
+  {
+    "match": "Skip to main content An official website of the United States Government",
+    "zone": "structure"
+  },
+  {
+    "match": "The Federal Reserve, the central bank of the United States, provides",
+    "zone": "structure"
+  },
+  {
+    "match": "- Monetary Policy - - - Federal Open Market Committee - About the FOMC",
+    "zone": "structure"
+  },
+  {
+    "match": "### Minutes of the Federal Open Market Committee",
+    "zone": "structure"
+  },
+  {
+    "match": "A joint meeting of the Federal Open Market Committee and the Board of Governors",
+    "zone": "background"
+  },
+  {
+    "match": "By unanimous vote, the following officers of the Committee were selected",
+    "zone": "background"
+  },
+  {
+    "match": "Staff Review of the Economic Situation The information available at the time of the meeting",
+    "zone": "background"
+  },
+  {
+    "match": "In their discussion of inflation developments, participants observed",
+    "zone": "background"
+  },
+  {
+    "match": "the Committee agreed to maintain the target range for the federal funds rate",
+    "zone": "background"
+  },
+  {
+    "match": "Undertake open market operations as necessary to maintain the federal funds rate",
+    "zone": "background"
+  },
+  {
+    "match": "By notation vote completed on January 8, 2025",
+    "zone": "background"
+  },
+  {
+    "match": "Executive Vice President, Federal Reserve Bank of Philadelphia",
+    "zone": "structure"
+  },
+  {
+    "match": "The Federal Open Market Committee is referenced as the",
+    "zone": "structure"
+  },
+  {
+    "match": "- About the Fed - News & Events",
+    "zone": "structure"
+  }
+]

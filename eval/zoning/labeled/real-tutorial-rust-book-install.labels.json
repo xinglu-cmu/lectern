@@ -1,0 +1,34 @@
+[
+  {
+    "match": "The first step is to install Rust",
+    "zone": "task"
+  },
+  {
+    "match": "open a terminal and enter the following command",
+    "zone": "task"
+  },
+  {
+    "match": "On Windows, go to",
+    "zone": "task"
+  },
+  {
+    "match": "To check whether you have Rust installed correctly, open a shell and enter this line",
+    "zone": "task"
+  },
+  {
+    "match": "From your shell, run the following update script",
+    "zone": "task"
+  },
+  {
+    "match": "The installation of Rust also includes a local copy of the documentation",
+    "zone": "background"
+  },
+  {
+    "match": "This book makes no assumptions about what tools you use",
+    "zone": "background"
+  },
+  {
+    "match": "In several examples, we will use Rust packages beyond the standard library",
+    "zone": "background"
+  }
+]

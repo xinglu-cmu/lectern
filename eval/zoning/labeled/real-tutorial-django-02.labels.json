@@ -1,0 +1,58 @@
+[
+  {
+    "match": "This tutorial begins where",
+    "zone": "background"
+  },
+  {
+    "match": "Now, open up :file:`mysite/settings.py`",
+    "zone": "task"
+  },
+  {
+    "match": "These applications are included by default as a convenience for the common case",
+    "zone": "background"
+  },
+  {
+    "match": "A model is the single, definitive source of information about your data",
+    "zone": "background"
+  },
+  {
+    "match": "That small bit of model code gives Django a lot of information",
+    "zone": "background"
+  },
+  {
+    "match": "By running ``makemigrations``, you're telling Django",
+    "zone": "background"
+  },
+  {
+    "match": "Now, let's hop into the interactive Python shell",
+    "zone": "task"
+  },
+  {
+    "match": "# Create a new Question.",
+    "zone": "example"
+  },
+  {
+    "match": "<QuerySet [<Question: Question object (1)>]>",
+    "zone": "example"
+  },
+  {
+    "match": "Request an ID that doesn't exist, this will raise an exception",
+    "zone": "example"
+  },
+  {
+    "match": "Generating admin sites for your staff or clients to add, change, and delete content is tedious work",
+    "zone": "background"
+  },
+  {
+    "match": "First we'll need to create a user who can login to the admin site. Run the following command",
+    "zone": "task"
+  },
+  {
+    "match": "Now, try logging in with the superuser account you created",
+    "zone": "task"
+  },
+  {
+    "match": "we need to tell the admin that",
+    "zone": "task"
+  }
+]

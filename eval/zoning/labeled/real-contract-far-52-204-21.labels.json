@@ -1,0 +1,38 @@
+[
+  {
+    "match": "Skip to main content",
+    "zone": "structure"
+  },
+  {
+    "match": "Main navigation",
+    "zone": "structure"
+  },
+  {
+    "match": "Breadcrumb",
+    "zone": "structure"
+  },
+  {
+    "match": "FAC Number: 2026-01 Effective Date",
+    "zone": "structure"
+  },
+  {
+    "match": "The Contractor shall apply the following basic safeguarding requirements",
+    "zone": "task"
+  },
+  {
+    "match": "Monitor, control, and protect organizational communications",
+    "zone": "task"
+  },
+  {
+    "match": "Far Parts ## Regulations FAR Menu",
+    "zone": "structure"
+  },
+  {
+    "match": "Sign up for FAR News Share the FAR",
+    "zone": "structure"
+  },
+  {
+    "match": "An official website of the General Services Administration",
+    "zone": "structure"
+  }
+]

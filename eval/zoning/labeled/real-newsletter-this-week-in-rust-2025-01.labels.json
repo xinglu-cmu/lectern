@@ -1,0 +1,54 @@
+[
+  {
+    "match": "Hello and welcome to another issue of",
+    "zone": "structure"
+  },
+  {
+    "match": "Dear community contributors: Please read README.md for guidance on submissions",
+    "zone": "structure"
+  },
+  {
+    "match": "Announcing Rust 1.84.0",
+    "zone": "structure"
+  },
+  {
+    "match": "The gen auto-trait problem",
+    "zone": "structure"
+  },
+  {
+    "match": "This week's crate is",
+    "zone": "background"
+  },
+  {
+    "match": "An important step for RFC implementation is for people to experiment",
+    "zone": "background"
+  },
+  {
+    "match": "Always wanted to contribute to open-source projects but did not know where to start?",
+    "zone": "task"
+  },
+  {
+    "match": "Are you a new or experienced speaker looking for a place",
+    "zone": "task"
+  },
+  {
+    "match": "469 pull requests were",
+    "zone": "background"
+  },
+  {
+    "match": "assert that `Instance::try_resolve`",
+    "zone": "structure"
+  },
+  {
+    "match": "A quiet week with little change to the actual compiler performance",
+    "zone": "background"
+  },
+  {
+    "match": "announces the 'final comment period' for RFCs",
+    "zone": "background"
+  },
+  {
+    "match": "Rusty Events between",
+    "zone": "structure"
+  }
+]

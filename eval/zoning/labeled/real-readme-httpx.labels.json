@@ -1,0 +1,26 @@
+[
+  {
+    "match": "butterfly.png",
+    "zone": "structure"
+  },
+  {
+    "match": "HTTPX builds on the well-established usability of",
+    "zone": "background"
+  },
+  {
+    "match": "$ pip install httpx",
+    "zone": "task"
+  },
+  {
+    "match": "Project documentation is available at",
+    "zone": "structure"
+  },
+  {
+    "match": "If you want to contribute with HTTPX check out the",
+    "zone": "task"
+  },
+  {
+    "match": "The HTTPX project relies on these excellent libraries",
+    "zone": "background"
+  }
+]

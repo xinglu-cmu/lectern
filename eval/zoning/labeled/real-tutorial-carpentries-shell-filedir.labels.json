@@ -1,0 +1,62 @@
+[
+  {
+    "match": "title: Navigating Files and Directories teaching: 30 exercises: 10",
+    "zone": "structure"
+  },
+  {
+    "match": "Several commands are frequently used to create, inspect, rename, and delete files",
+    "zone": "background"
+  },
+  {
+    "match": "The filesystem looks like an upside down tree",
+    "zone": "background"
+  },
+  {
+    "match": "Notice that there are two meanings for the `/` character",
+    "zone": "background"
+  },
+  {
+    "match": "you can clear your terminal using the `clear -x` command",
+    "zone": "task"
+  },
+  {
+    "match": "If you try to use an option that is not supported, `ls` and other commands will usually print an error",
+    "zone": "background"
+  },
+  {
+    "match": "The other way to learn about `ls` is to type",
+    "zone": "task"
+  },
+  {
+    "match": "What does the command `ls` do when used with the `-l` option?",
+    "zone": "task"
+  },
+  {
+    "match": "The `-l` option makes `ls` use a",
+    "zone": "example"
+  },
+  {
+    "match": "alkanes/ animal-counts/ creatures/",
+    "zone": "example"
+  },
+  {
+    "match": "you may also see a file called `.bash_profile`",
+    "zone": "background"
+  },
+  {
+    "match": "The shell interprets a tilde (`~`) character at the start of a path",
+    "zone": "background"
+  },
+  {
+    "match": "which of the following commands could Nelle use to navigate to her home directory",
+    "zone": "task"
+  },
+  {
+    "match": "1. No: `.` stands for the current directory",
+    "zone": "example"
+  },
+  {
+    "match": "if `pwd` displays `/Users/thing`, what will `ls -F ../backup` display?",
+    "zone": "task"
+  }
+]

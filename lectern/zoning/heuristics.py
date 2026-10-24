@@ -97,15 +97,40 @@ LEGAL_BOILERPLATE = re.compile(
     r"public records?|does not (commit|constitute|obligate)|no obligation|without (notice|"
     r"liability)|\bwarrant(y|ies)\b|indemnif|\bliabilit(y|ies)\b|not for redistribution|"
     r"intended only for the addressee|subject to change without notice|governed by the laws|"
-    r"unenforceable|severab|supersedes any prior|not a contract)",
+    r"unenforceable|severab|supersedes any prior|not a contract|subject to bcp 78|"
+    r"trademarks? (and|or) logos|brand guidelines|official websites use \.gov|"
+    r"secure \.gov websites|request an accessible format|users of assistive technology|"
+    r"legal provisions relating to ietf documents|simplified bsd license|"
+    r"official website of the|here(’|')s how you know|jump to content|return to top|back to top)",
     re.I,
 )
 TABLE_CONTENT_HEADINGS = re.compile(
     r"\b(schedule|timetable|calendar|plans?|pricing|agenda|important dates|office hours)\b", re.I
 )
 TERMS_HEADING = re.compile(r"^(\d+[.)]?\s*)?terms$", re.I)
+POINTER_HEADINGS = re.compile(  # a short section that only points elsewhere
+    r"\b(license|licen[cs]ing|documentation|contributing|trademarks?|further reading|see also|"
+    r"next steps|sponsors?|credits|maintainers?)\b",
+    re.I,
+)
+SITE_CHROME_HEADINGS = re.compile(  # a web page's own furniture, whatever its length
+    r"\b(share this page|explore the topic|updates to this page|get help|about this site|"
+    r"sign up for emails|is this page useful|help us improve)\b",
+    re.I,
+)
+METADATA_KEY = re.compile(r"(?:^|\s)[A-Za-z][\w-]{1,24}(?: [A-Za-z]+)?:\s+\S")  # "Title: …"
+CITATION_LINE = re.compile(r"^\s*\[[\w.-]+\]\s", re.M)  # [RFC2119] Bradner, S., …
+BADGE = re.compile(r"\[!\[|img\.shields\.io|badge\.fury\.io")
+MARKUP = re.compile(r"\{%.*?%\}|\{\{.*?\}\}|`[^`\n]*`")  # templating, inline code: not code lines
+LINK_ITEM = re.compile(r"^\s*[-*+]\s+\[[^\]]+\]\(")  # "* [Title](url)"
+NAV_SPLIT = re.compile(r"(?:^|\s)[-•*]\s+")
+INSTRUCTION = re.compile(  # prose that tells the reader to run what follows
+    r"\b(run|enter|type|execute|paste) (the following|this)\b|\binstall (with|using|via)\b|"
+    r"(?:^|[.:]\s+)(install|run|open|type|enter|execute)\b",
+    re.I,
+)
 FENCED_CODE = re.compile(r"```.*?```", re.S)
-TOC_LINE = re.compile(r"(\.{3,}|…)\s*\d{1,4}\s*$|^\s*\d+(\.\d+)*\s+\S.*\s\d{1,4}\s*$", re.M)
+TOC_LINE = re.compile(r"((\.\s?){3,}|…)\s*\d{1,4}\s*$|^\s*\d+(\.\d+)*\s+\S.*\s\d{1,4}\s*$", re.M)
 URL = re.compile(r"https?://|www\.|\]\([^)]+\)", re.I)  # bare URLs and Markdown links
 CODE_LINE = re.compile(
     r"[;{}]\s*$|^\s*(def|class|import|from|return|if|for|while|var|let|const|int|void|public|#include)\b|[=<>!]=|\(\)|->|=>|\$\s"
@@ -158,6 +183,17 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
         signals.append("title_block")
         return Zone.structure, 0.6, signals
 
+    # 1b. a metadata block: front matter, a PEP or RFC header, "Title: … Date: …" — at least
+    #     three "key: value" lines and next to nothing else
+    meta_keys = len(METADATA_KEY.findall(body[:600]))
+    front_matter = body.startswith("---")
+    if (meta_keys >= 2 and front_matter) or (meta_keys >= 3 and seg.seq == 1 and len(body) <= 900):
+        signals.append(f"metadata_block={meta_keys}")
+        return Zone.structure, 0.75, signals
+    if len(body) <= 20 and body and not body[0].isalnum() and "```" not in body:
+        signals.append("stub")
+        return Zone.structure, 0.5, signals
+
     # 1. page furniture: headers, footers, page numbers
     furniture = flags & FURNITURE_FLAGS
     if furniture:
@@ -183,6 +219,22 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
     if STRUCTURE_HEADINGS.search(heading) or TERMS_HEADING.match(heading.strip()):
         signals.append("heading:structure")
         return Zone.structure, 0.75, signals
+    if SITE_CHROME_HEADINGS.search(heading):
+        signals.append("heading:site_chrome")
+        return Zone.structure, 0.75, signals
+    if (
+        POINTER_HEADINGS.search(heading)
+        and len(re.sub(r"\(https?://[^)]*\)", "", body)) <= 400
+        and not IMPERATIVE_START.match(body.strip())
+        and not INSTRUCTION.search(body)
+    ):
+        signals.append("heading:pointer")
+        return Zone.structure, 0.7, signals
+    if len(BADGE.findall(body)) >= 2 and seg.seq <= 2:
+        rest = re.sub(r"\[!\[.*?\)\)|!\[.*?\)|\[.*?\]\(.*?\)|<[^>]+>", "", body).strip()
+        if len(rest) <= 160:
+            signals.append("badges")
+            return Zone.structure, 0.7, signals
 
     # 4. code, tables, examples
     if "code_heavy" in flags:
@@ -192,15 +244,34 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
         if TABLE_CONTENT_HEADINGS.search(heading) and not EXAMPLE_HEADINGS.search(heading):
             return Zone.background, 0.6, signals
         return Zone.example, 0.9, signals
-    code_lines = [ln for ln in body.splitlines() if ln.strip()]
+    fenced = "".join(FENCED_CODE.findall(body))
+    prose_part = FENCED_CODE.sub("", body)
+    if body.count("```") % 2 == 1:  # a fence the segmenter cut: code to the end
+        tail = body[body.rfind("```") :]
+        fenced += tail
+        prose_part = prose_part.replace(tail, "")
+    fenced_share = len(fenced) / max(1, len(body))
+    if fenced and INSTRUCTION.search(prose_part) and fenced_share < 0.7:
+        # "open a terminal and enter the following command: ```…```" tells the reader to act
+        signals.append("instructions+code")
+        return Zone.task, 0.65, signals
+    if fenced and fenced_share >= 0.5:
+        signals.append(f"fenced_code={fenced_share:.0%}")
+        return Zone.example, 0.85 if fenced_share >= 0.7 else 0.7, signals
+    code_lines = [ln for ln in MARKUP.sub("", body).splitlines() if ln.strip()]
     code_like = sum(1 for ln in code_lines if CODE_LINE.search(ln))
-    if code_lines and len(code_lines) >= 2 and code_like / len(code_lines) >= 0.5:
+    grammar = sum(1 for ln in code_lines if re.match(r"^\s*[\w-]+\s*=\s", ln))
+    rules = sum(1 for ln in code_lines if re.fullmatch(r"\s*[-=_ ]{6,}\s*", ln))
+    if grammar >= 3 or rules >= 2:  # an ABNF grammar, or an ASCII table with rule lines
+        signals.append(f"grammar={grammar},rules={rules}")
+        return Zone.example, 0.7, signals
+    if code_lines and len(code_lines) >= 3 and code_like / len(code_lines) >= 0.5:
         signals.append(f"code_like={code_like}/{len(code_lines)}")
         return Zone.example, 0.7, signals
     if EXAMPLE_HEADINGS.search(heading):
         signals.append("heading:example")
         return Zone.example, 0.75, signals
-    if EXAMPLE_MARKERS.search(body):
+    if EXAMPLE_MARKERS.search(body) and (fenced or seg.tokens_est <= 250):
         signals.append("marker:example")
         return Zone.example, 0.6, signals
 
@@ -229,6 +300,28 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
         return Zone.structure, 0.75, signals
     if lines and short_lines / len(lines) >= 0.7 and (urls >= 2 or len(lines) >= 6):
         signals.append(f"short_lines={short_lines}/{len(lines)},urls={urls}")
+        return Zone.structure, 0.7, signals
+    citations = len(CITATION_LINE.findall(prose))
+    if citations >= 3 and citations / max(1, len(lines)) >= 0.5:
+        signals.append(f"references={citations}")
+        return Zone.structure, 0.75, signals
+    link_items = sum(1 for ln in lines if LINK_ITEM.match(ln))
+    if len(lines) >= 3 and link_items / len(lines) >= 0.8:
+        signals.append(f"link_list={link_items}/{len(lines)}")
+        return Zone.structure, 0.7, signals
+    # a navigation list: many short items, no sentences, next to nothing imperative
+    first_sep = NAV_SPLIT.search(prose)
+    items = [it.strip() for it in NAV_SPLIT.split(prose) if it.strip()]
+    if (
+        first_sep
+        and len(prose[: first_sep.start()].split()) <= 8
+        and len(items) >= 3
+        and sum(1 for it in items if len(it.split()) <= 6) / len(items) >= 0.8
+        and not re.search(r"[a-z]{3}[.!?](\s|$)", prose)
+        and sum(1 for it in items if IMPERATIVE_START.match(it)) / len(items) <= 0.1
+        and sum(len(it.split()) for it in items) <= 200
+    ):
+        signals.append(f"nav_list={len(items)}")
         return Zone.structure, 0.7, signals
 
     # 5. task vs background
@@ -273,7 +366,9 @@ def _classify(seg: Segment, findings: list[Finding]) -> tuple[Zone, float, list[
         return Zone.task, 0.5, signals
     if bg_hits:
         return Zone.background, 0.5, signals
-    if sentences and avg_len >= 8 and prose.endswith((".", "!", "?")):
+    if sentences and avg_len >= 8 and prose.rstrip(")]*_`").endswith((".", "!", "?")):
         signals.append("prose")
         return Zone.background, 0.4, signals
+    if task_heading:
+        return Zone.task, 0.55, signals
     return Zone.unknown, 0.3, signals

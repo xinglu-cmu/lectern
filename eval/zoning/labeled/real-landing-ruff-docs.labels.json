@@ -1,0 +1,22 @@
+[
+  {
+    "match": "Skip to content Ruff ruff - Overview",
+    "zone": "structure"
+  },
+  {
+    "match": "Initializing search",
+    "zone": "structure"
+  },
+  {
+    "match": "An extremely fast Python linter and code formatter, written in Rust",
+    "zone": "background"
+  },
+  {
+    "match": "Ruff is so fast that sometimes I add an intentional bug",
+    "zone": "background"
+  },
+  {
+    "match": "Made with Material for MkDocs",
+    "zone": "structure"
+  }
+]

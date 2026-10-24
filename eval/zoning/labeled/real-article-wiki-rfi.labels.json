@@ -1,0 +1,38 @@
+[
+  {
+    "match": "Jump to content",
+    "zone": "structure"
+  },
+  {
+    "match": "Main menu Main menu move to sidebar",
+    "zone": "structure"
+  },
+  {
+    "match": "Contents move to sidebar hide",
+    "zone": "structure"
+  },
+  {
+    "match": "The ubiquitous availability of the Internet has made many government agencies",
+    "zone": "background"
+  },
+  {
+    "match": "An RFI is used in the construction industry when",
+    "zone": "background"
+  },
+  {
+    "match": "The exact format of an RFI will vary",
+    "zone": "background"
+  },
+  {
+    "match": "What Is the Difference Between RFP and RFI?",
+    "zone": "structure"
+  },
+  {
+    "match": "Retrieved from",
+    "zone": "structure"
+  },
+  {
+    "match": "This page was last edited on",
+    "zone": "structure"
+  }
+]

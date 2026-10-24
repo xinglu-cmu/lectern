@@ -1,0 +1,42 @@
+[
+  {
+    "match": "title: GitHub Event Terms redirect_from",
+    "zone": "structure"
+  },
+  {
+    "match": "In order to participate in the Event, you represent that",
+    "zone": "task"
+  },
+  {
+    "match": "sometimes take photos and videos at the Event",
+    "zone": "background"
+  },
+  {
+    "match": "Event sponsors, exhibitors, and other third parties may directly request your personal",
+    "zone": "background"
+  },
+  {
+    "match": "we cannot guarantee 100% safety for participants",
+    "zone": "background"
+  },
+  {
+    "match": "hereby release, waive, discharge and covenant not to sue",
+    "zone": "structure"
+  },
+  {
+    "match": "You agree to indemnify and hold GitHub",
+    "zone": "structure"
+  },
+  {
+    "match": "GitHub reserves the right to revoke your permission to attend",
+    "zone": "background"
+  },
+  {
+    "match": "California law will govern these Event Terms",
+    "zone": "structure"
+  },
+  {
+    "match": "You agree that you will not represent yourself as an employee",
+    "zone": "task"
+  }
+]

@@ -27,12 +27,27 @@ python eval/redteam/run.py --check
 contains, so labels survive changes in how the segmenter cuts. `run.py` reports accuracy, macro-F1
 per zone and a confusion matrix for heuristic-only zoning; `--llm` adds the Claude pass and the
 heuristic-vs-model delta (`--llm` needs `ANTHROPIC_API_KEY`; `--local` a model served by Ollama).
-v0.3 has 30 authored documents of as many kinds (assignment, syllabus, RFP, article, spec, paper,
-email, contract, manual, lecture, job post, lab report, minutes, grant call, README, newsletter,
-press release, tutorial, terms of service, exam, résumé, release notes, FAQ, SOP, call for papers,
-bug report, meeting agenda, offer letter, landing page, company AI policy). With 30 documents the
-gate is armed: `--check` fails CI when heuristic macro-F1 drops below 0.75. Authored documents are
-a start; the set should grow with real ones, labelled by phrase.
+v0.4 has 68 documents: 30 authored ones of as many kinds (assignment, syllabus, RFP, article,
+spec, paper, email, contract, manual, lecture, job post, lab report, minutes, grant call, README,
+newsletter, press release, tutorial, terms of service, exam, résumé, release notes, FAQ, SOP, call
+for papers, bug report, meeting agenda, offer letter, landing page, company AI policy) and, since
+2026-10-23, 38 **real** public documents (`real-*`; sources and licences in
+[`labeled/SOURCES.md`](zoning/labeled/SOURCES.md)): RFCs, PEPs, READMEs, GitHub docs and policies,
+a FAR clause, GOV.UK pages, FOMC minutes, Wikipedia articles, MIT OCW and CS50 pages, tutorials, a
+release post, a FAQ, a newsletter, a landing page. None of them is in the distillation corpus
+(`eval/distill/corpus.md`), so the distilled classifier never saw them. Every table `run.py` prints
+is also split by group. The gate is armed on the whole set: `--check` fails CI when heuristic
+macro-F1 drops below 0.75.
+
+**What the real documents say** (first run, heuristics / distilled classifier, accuracy and
+macro-F1): authored 0.85 / 0.88 and 0.86 / 0.88; real 0.63 / 0.62 and 0.72 / 0.67. Before the
+rules added with them the heuristics scored 0.51 / 0.53 on the real group. Real documents bring
+what authored ones do not: YAML front matter and PEP/RFC headers, navigation and link lists,
+reference lists, badges, IETF boilerplate, pointer sections ("Documentation", "See also"), and
+code blocks preceded by "run the following" — each now a rule with a unit test. What is left is
+mostly the task / background boundary on real prose (RFC *must* sentences, FAQ answers, wiki
+articles) and mixed segments where an explanation ends in a code block; the model passes, not the
+heuristics, are the lever there, and the first four-column run on the real group says how much each recovers: Claude 0.81 / 0.77, the distilled classifier 0.72 / 0.67, the local `qwen2.5:7b` 0.68 / 0.63 (accuracy / macro-F1). On real text Claude is clearly the best zoner; the authored set had hidden that ([ADR-014](../docs/adr/ADR-014-distilled-classifier.md), addendum).
 
 **Labeling rule for task vs background** (settled in [ADR-013](../docs/adr/ADR-013-local-model-choice.md)
 after the first ablation): `task` is what *the reader of this document* is asked to do, answer,
@@ -49,6 +64,7 @@ python eval/zoning/run.py            # heuristic-only
 python eval/zoning/run.py --check    # the gate (CI)
 python eval/zoning/run.py --llm      # + Claude Haiku, with the ablation delta
 python eval/zoning/run.py --local    # + the local model (qwen2.5:7b through Ollama)
+python eval/zoning/run.py --distilled # + the distilled classifier (offline)
 ```
 
 ## `distill/` — the distillation corpus (DESIGN §8, G7)
